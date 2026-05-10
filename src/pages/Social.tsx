@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Heart, Plus, Edit2, Trash2, Loader2, X, MessageSquare, Image as ImageIcon, Send, Filter } from 'lucide-react';
+import { Heart, Plus, Loader2, X, MessageSquare, Image as ImageIcon, Send } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useReunion } from '../context/ReunionContext';
 import { supabase } from '../lib/supabase';
@@ -30,7 +30,7 @@ interface Action {
 
 export default function Social() {
     const { user, profile } = useAuth();
-    const { reunion, userRole } = useReunion();
+    const { reunion } = useReunion();
     
     const [activeTab, setActiveTab] = useState<'actions' | 'secours'>('actions');
     const [actions, setActions] = useState<Action[]>([]);

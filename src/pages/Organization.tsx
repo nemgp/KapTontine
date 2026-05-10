@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
-import { History, Users, Plus, Trash2, Edit2, Check, X, Loader2, UserPlus } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
+import { Trash2, Edit2, Check, X, Loader2, UserPlus } from 'lucide-react';
 import { useReunion } from '../context/ReunionContext';
 import { supabase } from '../lib/supabase';
 
@@ -17,7 +16,6 @@ interface Member {
 }
 
 export default function Organization() {
-    const { user } = useAuth();
     const { reunion, userRole } = useReunion();
     const [activeTab, setActiveTab] = useState<'current' | 'history'>('current');
     const [members, setMembers] = useState<Member[]>([]);
@@ -280,7 +278,6 @@ export default function Organization() {
                 </div>
             ) : (
                 <div className="glass-card text-center py-20">
-                    <History className="mx-auto text-slate-500 mb-4" size={48} />
                     <p className="text-slate-400">L'historique des cycles précédents sera disponible bientôt.</p>
                 </div>
             )}

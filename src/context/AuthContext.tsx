@@ -15,6 +15,7 @@ interface AuthContextType {
     profile: Profile | null;
     login: (email: string, password: string) => Promise<void>;
     logout: () => Promise<void>;
+    changePassword: (password: string) => Promise<void>;
     isAuthenticated: boolean;
     isLoading: boolean;
 }
@@ -91,6 +92,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         await supabase.auth.signOut();
     };
 
+    const changePassword = async (password: string) => {
+        const { error } = await supabase.auth.updateUser({ password });
+        if (error) throw new Error(error.message);
+    };
+
     return (
         <AuthContext.Provider
             value={{
@@ -98,6 +104,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 profile,
                 login,
                 logout,
+                changePassword,
                 isAuthenticated: !!user,
                 isLoading
             }}

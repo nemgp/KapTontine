@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Calendar, CheckCircle, Clock, Banknote, Video, Loader2, TrendingUp, Users } from 'lucide-react';
+import { CheckCircle, Clock, Banknote, Video, Loader2, TrendingUp } from 'lucide-react';
 import { useReunion } from '../context/ReunionContext';
 import { supabase } from '../lib/supabase';
 

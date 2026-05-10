@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Calculator, Wallet, TrendingUp, AlertCircle, PiggyBank, Plus, Edit2, Trash2, X, Loader2, Check } from 'lucide-react';
+import { Plus, Edit2, Trash2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useReunion } from '../context/ReunionContext';
 import { supabase } from '../lib/supabase';
@@ -24,14 +24,13 @@ interface Saving {
 }
 
 export default function Finance() {
-    const { user, userRole } = useAuth();
+    const { user } = useAuth();
     const { reunion } = useReunion();
     const [activeTab, setActiveTab] = useState<'cotisations' | 'prets' | 'sanctions'>('cotisations');
 
     const [loans, setLoans] = useState<Loan[]>([]);
     const [savings, setSavings] = useState<Saving[]>([]);
     const [members, setMembers] = useState<any[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
     
     // Form States
     const [showLoanModal, setShowLoanModal] = useState(false);
@@ -41,12 +40,11 @@ export default function Finance() {
 
     // Calculators
     const [loanAmount, setLoanAmount] = useState(100);
-    const [loanType, setLoanType] = useState('type1');
     const [lateMeetings, setLateMeetings] = useState(0);
     const [absences, setAbsences] = useState(0);
     const [projectDelays, setProjectDelays] = useState(0);
 
-    const isAdmin = userRole === 'admin' || true; // For now
+    // const isAdmin = userRole === 'admin' || true; // For now
 
     useEffect(() => {
         if (reunion?.id) {
@@ -55,7 +53,6 @@ export default function Finance() {
     }, [reunion?.id]);
 
     const fetchData = async () => {
-        setIsLoading(true);
         try {
             const [loansRes, savingsRes, membersRes] = await Promise.all([
                 supabase.from('loans').select('*').eq('id_reunion', reunion?.id),
@@ -68,14 +65,12 @@ export default function Finance() {
             if (membersRes.data) setMembers(membersRes.data);
         } catch (err) {
             console.error("Error fetching finance data:", err);
-        } finally {
-            setIsLoading(false);
         }
     };
 
     const handleSaveLoan = async (e: React.FormEvent) => {
         e.preventDefault();
-        const formData = new FormData(e.currentTarget);
+        const formData = new FormData(e.currentTarget as HTMLFormElement);
         const data = {
             member_name: formData.get('member_name') as string,
             amount: Number(formData.get('amount')),
@@ -99,7 +94,7 @@ export default function Finance() {
 
     const handleSaveSaving = async (e: React.FormEvent) => {
         e.preventDefault();
-        const formData = new FormData(e.currentTarget);
+        const formData = new FormData(e.currentTarget as HTMLFormElement);
         const data = {
             member_name: formData.get('member_name') as string,
             amount: Number(formData.get('amount')),

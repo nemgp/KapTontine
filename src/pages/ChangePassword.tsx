@@ -10,7 +10,7 @@ export default function ChangePassword() {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    const { changePassword, user } = useAuth();
+    const { changePassword } = useAuth();
     const navigate = useNavigate();
 
     const validatePassword = (password: string): string | null => {
@@ -43,7 +43,7 @@ export default function ChangePassword() {
         setIsLoading(true);
 
         try {
-            await changePassword(oldPassword, newPassword);
+            await changePassword(newPassword);
             setSuccess(true);
 
             // Redirect after 2 seconds
@@ -65,13 +65,6 @@ export default function ChangePassword() {
                         <Lock className="text-purple-400" size={28} />
                     </div>
                     <h1 className="text-2xl font-bold text-white mb-2">Changer mon mot de passe</h1>
-                    {user?.mustChangePassword && (
-                        <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3 mt-4">
-                            <p className="text-sm text-yellow-200">
-                                ⚠️ Vous devez changer votre mot de passe par défaut pour continuer
-                            </p>
-                        </div>
-                    )}
                 </div>
 
                 {error && (
@@ -160,16 +153,14 @@ export default function ChangePassword() {
                         )}
                     </button>
 
-                    {!user?.mustChangePassword && (
-                        <button
-                            type="button"
-                            onClick={() => navigate('/')}
-                            className="btn bg-white/5 text-white hover:bg-white/10 w-full"
-                            disabled={isLoading || success}
-                        >
-                            Annuler
-                        </button>
-                    )}
+                    <button
+                        type="button"
+                        onClick={() => navigate('/')}
+                        className="btn bg-white/5 text-white hover:bg-white/10 w-full"
+                        disabled={isLoading || success}
+                    >
+                        Annuler
+                    </button>
                 </form>
             </div>
         </div>
