@@ -7,7 +7,10 @@ if (!supabaseUrl || !supabaseAnonKey) {
   console.error("Missing Supabase environment variables. Check your .env file.");
 }
 
+// Nettoyage de l'URL pour éviter l'erreur "Invalid path specified in request URL"
+const cleanUrl = supabaseUrl?.replace(/\/rest\/v1\/?$/, '').replace(/\/$/, '');
+
 export const supabase = createClient(
-  supabaseUrl || '',
+  cleanUrl || '',
   supabaseAnonKey || ''
 );
