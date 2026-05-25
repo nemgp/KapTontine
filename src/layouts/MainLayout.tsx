@@ -81,11 +81,14 @@ export default function MainLayout({ children }: MainLayoutProps) {
                 </nav>
 
                 <div className="p-4 border-t border-white/10 bg-slate-900/30">
-                    <div className="flex items-center gap-3 mb-4 px-2">
+                    <button 
+                        onClick={() => navigate('/profil')}
+                        className="flex items-center gap-3 mb-4 px-2 w-full text-left hover:bg-white/5 p-2 rounded-xl transition-colors"
+                    >
                         {profile?.avatar ? (
                             <img src={profile.avatar} alt="Avatar" className="w-10 h-10 rounded-full border border-white/20 object-cover" />
                         ) : (
-                            <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-purple-600 to-blue-600 flex items-center justify-center text-lg font-bold border border-white/20 shadow-inner">
+                            <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-purple-600 to-blue-600 flex items-center justify-center text-lg font-bold border border-white/20 shadow-inner shrink-0">
                                 {profile?.nom?.charAt(0).toUpperCase() || profile?.email?.charAt(0).toUpperCase() || 'U'}
                             </div>
                         )}
@@ -93,7 +96,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
                             <p className="text-sm font-medium truncate text-white">{profile?.nom || profile?.email}</p>
                             <p className="text-[10px] text-purple-300 uppercase tracking-wider">{userPoste || 'Membre'}</p>
                         </div>
-                    </div>
+                    </button>
 
                     {/* Admin Section */}
                     {canEdit && (

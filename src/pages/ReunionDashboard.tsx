@@ -41,6 +41,8 @@ export default function ReunionDashboard() {
         }
     }, [reunion?.id]);
 
+    const [totalTontine, setTotalTontine] = useState(0);
+
     const fetchMembers = async () => {
         setIsLoading(true);
         try {
@@ -51,10 +53,33 @@ export default function ReunionDashboard() {
 
             if (error) throw error;
             setMembers(data || []);
+            
+            await fetchFinancials();
         } catch (err) {
             console.error("Error fetching members for dashboard:", err);
         } finally {
             setIsLoading(false);
+        }
+    };
+
+    const fetchFinancials = async () => {
+        try {
+            const { data: savingsData, error: savingsError } = await supabase
+                .from('savings')
+                .select('amount, type')
+                .eq('id_reunion', reunion?.id);
+                
+            if (savingsError) throw savingsError;
+            
+            let total = 0;
+            if (savingsData) {
+                total = savingsData.reduce((acc, curr) => {
+                    return curr.type === 'depot' ? acc + Number(curr.amount) : acc - Number(curr.amount);
+                }, 0);
+            }
+            setTotalTontine(total);
+        } catch (err) {
+            console.error("Error fetching financials:", err);
         }
     };
 
@@ -125,14 +150,14 @@ export default function ReunionDashboard() {
                 </div>
 
                 <div className="glass-card border-l-4 border-l-[var(--valorant-red)]">
-                    <h2 className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-1">Cotisation Tontine</h2>
+                    <h2 className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-1">Cagnotte Réunion</h2>
                     <div className="flex items-baseline gap-2">
-                        <span className="text-3xl font-black text-white italic">313 €</span>
-                        <span className="text-[10px] text-slate-500 font-bold">/ 331 €</span>
+                        <span className="text-3xl font-black text-white italic">{totalTontine} €</span>
+                        <span className="text-[10px] text-slate-500 font-bold">Collectés</span>
                     </div>
                     <div className="mt-4">
                         <div className="progress-container">
-                            <div className="progress-bar w-[95%]"></div>
+                            <div className="progress-bar w-[100%]"></div>
                         </div>
                     </div>
                 </div>

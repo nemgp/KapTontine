@@ -108,7 +108,13 @@ export default function GlobalDashboard() {
                 <header className="flex justify-between items-center mb-10">
                     <div>
                         <h1 className="text-3xl font-bold text-white drop-shadow-md">Mes Réunions</h1>
-                        <p className="text-slate-400 mt-1">Bonjour {profile?.nom || profile?.email}</p>
+                        <button 
+                            onClick={() => navigate('/profil')}
+                            className="text-slate-400 mt-1 hover:text-purple-400 transition-colors flex items-center gap-2 text-sm"
+                        >
+                            Bonjour {profile?.nom || profile?.email}
+                            <span className="text-xs bg-white/10 px-2 py-0.5 rounded-full border border-white/10">Mon Profil</span>
+                        </button>
                     </div>
                     <button 
                         onClick={() => setShowCreateModal(true)}

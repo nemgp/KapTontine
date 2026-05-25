@@ -45,9 +45,29 @@ export default function Social() {
     const [isSubmittingAction, setIsSubmittingAction] = useState(false);
 
     useEffect(() => {
-        if (reunion?.id) {
-            fetchActions();
-        }
+        if (!reunion?.id) return;
+
+        fetchActions();
+
+        const subscription = supabase
+            .channel('actions-changes')
+            .on(
+                'postgres_changes',
+                {
+                    event: 'INSERT',
+                    schema: 'public',
+                    table: 'actions',
+                    filter: `id_reunion=eq.${reunion.id}`
+                },
+                () => {
+                    fetchActions();
+                }
+            )
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(subscription);
+        };
     }, [reunion?.id]);
 
     const fetchActions = async () => {
