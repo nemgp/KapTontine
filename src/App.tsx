@@ -10,6 +10,8 @@ import Finance from './pages/Finance';
 import Social from './pages/Social';
 import Documents from './pages/Documents';
 import Profile from './pages/Profile';
+import PaymentSuccess from './pages/PaymentSuccess';
+import PaymentCancel from './pages/PaymentCancel';
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
     const { isAuthenticated, isLoading } = useAuth();
@@ -37,6 +39,8 @@ export default function App() {
                     {/* Routes Protégées Globales */}
                     <Route path="/" element={<PrivateRoute><GlobalDashboard /></PrivateRoute>} />
                     <Route path="/profil" element={<PrivateRoute><Profile /></PrivateRoute>} />
+                    <Route path="/success" element={<PrivateRoute><PaymentSuccess /></PrivateRoute>} />
+                    <Route path="/cancel" element={<PrivateRoute><PaymentCancel /></PrivateRoute>} />
                     
                     {/* Routes Protégées spécifiques à une Réunion */}
                     <Route path="/reunions/:reunionId" element={<PrivateRoute><ReunionLayout /></PrivateRoute>}>

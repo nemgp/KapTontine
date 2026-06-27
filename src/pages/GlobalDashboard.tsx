@@ -57,42 +57,16 @@ export default function GlobalDashboard() {
         setIsCreating(true);
 
         try {
-            // 1. Simulate Stripe Payment (Mock)
-            await new Promise(resolve => setTimeout(resolve, 1500)); 
+            const { data, error } = await supabase.functions.invoke('create-checkout', {
+                body: { reunionName: newReunionName, userId: user?.id }
+            });
+
+            if (error) throw error;
             
-            // 2. Create Reunion
-            const expiryDate = new Date();
-            expiryDate.setFullYear(expiryDate.getFullYear() + 2); // 2 years from now
-
-            const { data: reunionData, error: reunionError } = await supabase
-                .from('reunions')
-                .insert({
-                    nom: newReunionName,
-                    description: "Nouvelle réunion KapTontine",
-                    date_expiration: expiryDate.toISOString(),
-                    id_createur: user?.id
-                })
-                .select()
-                .single();
-
-            if (reunionError) throw reunionError;
-
-            // 3. Add creator as admin
-            if (reunionData) {
-                const { error: memberError } = await supabase
-                    .from('membres_reunion')
-                    .insert({
-                        id_reunion: reunionData.id,
-                        id_profile: user?.id,
-                        role: 'admin',
-                        poste: 'Président'
-                    });
-
-                if (memberError) throw memberError;
-
-                setShowCreateModal(false);
-                setNewReunionName('');
-                fetchReunions(); // Refresh list
+            if (data?.url) {
+                window.location.href = data.url;
+            } else {
+                throw new Error("Impossible d'obtenir l'URL de paiement.");
             }
         } catch (err) {
             console.error("Erreur de création:", err);
@@ -202,7 +176,7 @@ export default function GlobalDashboard() {
                                     </div>
                                     <div className="flex items-center gap-2 text-xs text-slate-400">
                                         <CreditCard size={14} />
-                                        <span>Paiement sécurisé via Stripe (Mode Simulateur)</span>
+                                        <span>Paiement sécurisé via Stripe</span>
                                     </div>
                                 </div>
 
