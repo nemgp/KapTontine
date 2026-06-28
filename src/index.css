@@ -24,65 +24,18 @@
 
   :root.light {
     /* Light theme variables */
-    --bg-color: #F1F5F9;
+    --bg-color: #F8FAFC;
     --text-color: #0F172A;
     --text-muted: #475569;
-    --card-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%);
-    --card-hover-bg: linear-gradient(135deg, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0.8) 100%);
+    --card-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.85) 100%);
+    --card-hover-bg: linear-gradient(135deg, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0.9) 100%);
     --card-border: rgba(15, 23, 42, 0.08);
-    --card-hover-border: rgba(157, 23, 77, 0.2); /* Slight pink/purple hint for light mode active hover */
-    --panel-bg: rgba(255, 255, 255, 0.9);
+    --card-hover-border: rgba(147, 51, 234, 0.3); /* Slight purple hover border */
+    --panel-bg: rgba(255, 255, 255, 0.95);
     --border-color: rgba(15, 23, 42, 0.08);
-    --input-bg: rgba(255, 255, 255, 0.9);
+    --input-bg: rgba(255, 255, 255, 0.95);
     --radial-red: rgba(255, 70, 85, 0.03);
     --radial-cyan: rgba(0, 245, 255, 0.03);
-    
-    /* Text color overrides for light mode */
-    .text-white {
-      color: #0F172A !important;
-    }
-    .text-slate-100 {
-      color: #0F172A !important;
-    }
-    .text-slate-200 {
-      color: #1E293B !important;
-    }
-    .text-slate-300 {
-      color: #475569 !important;
-    }
-    .text-slate-400 {
-      color: #475569 !important;
-    }
-    .text-slate-500 {
-      color: #64748B !important;
-    }
-    .text-purple-300 {
-      color: #7C3AED !important;
-    }
-    
-    /* Background/border overrides for light mode */
-    .bg-slate-900\/50 {
-      background-color: rgba(255, 255, 255, 0.6) !important;
-    }
-    .bg-white\/5 {
-      background-color: rgba(15, 23, 70, 0.05) !important;
-    }
-    .bg-white\/10 {
-      background-color: rgba(15, 23, 70, 0.08) !important;
-    }
-    .bg-black\/20 {
-      background-color: rgba(15, 23, 70, 0.06) !important;
-    }
-    .border-white\/10 {
-      border-color: rgba(15, 23, 70, 0.08) !important;
-    }
-    .border-white\/20 {
-      border-color: rgba(15, 23, 70, 0.12) !important;
-    }
-    .bg-purple-900\/20 {
-      background-color: rgba(124, 58, 237, 0.08) !important;
-      border-color: rgba(124, 58, 237, 0.15) !important;
-    }
   }
 
   body {
@@ -96,6 +49,77 @@
       radial-gradient(at 0% 100%, var(--radial-cyan) 0px, transparent 50%);
     background-attachment: fixed;
     transition: background-color 0.3s ease, color 0.3s ease;
+  }
+}
+
+/* Light theme general utility overrides */
+:root.light {
+  /* Text overrides */
+  .text-white:not(.btn):not(.active):not(.bg-purple-600):not(.btn-primary):not(.btn-secondary) {
+    color: var(--text-color) !important;
+  }
+  .text-slate-50, .text-slate-100, .text-slate-200 {
+    color: var(--text-color) !important;
+  }
+  .text-slate-300, .text-slate-400 {
+    color: var(--text-muted) !important;
+  }
+  .text-cyan-300 {
+    color: #0891B2 !important; /* cyan-600 for contrast */
+  }
+  .text-purple-300 {
+    color: #7C3AED !important; /* purple-600 */
+  }
+
+  /* Background overrides */
+  .bg-slate-900\/50 {
+    background-color: rgba(255, 255, 255, 0.7) !important;
+  }
+  .bg-white\/5 {
+    background-color: rgba(0, 0, 0, 0.04) !important;
+  }
+  .bg-white\/10 {
+    background-color: rgba(0, 0, 0, 0.07) !important;
+  }
+  .bg-black\/20 {
+    background-color: rgba(0, 0, 0, 0.05) !important;
+  }
+  
+  /* Border overrides */
+  .border-white\/10 {
+    border-color: rgba(0, 0, 0, 0.06) !important;
+  }
+  .border-white\/20 {
+    border-color: rgba(0, 0, 0, 0.1) !important;
+  }
+
+  /* Keep contrast inside active/colored components */
+  .active, .active * {
+    color: #FFFFFF !important;
+  }
+  .btn-primary, .btn-primary * {
+    color: #FFFFFF !important;
+  }
+  .btn-secondary, .btn-secondary * {
+    color: #0F172A !important;
+  }
+
+  /* Input fields */
+  input, select, textarea {
+    background-color: #FFFFFF !important;
+    color: #0F172A !important;
+    border: 1px solid rgba(15, 23, 42, 0.15) !important;
+  }
+
+  input::placeholder, textarea::placeholder {
+    color: #64748B !important;
+    opacity: 0.8 !important;
+  }
+  
+  /* Sidebar */
+  aside {
+    color: var(--text-color) !important;
+    border-right: 1px solid var(--border-color);
   }
 }
 
@@ -144,7 +168,7 @@
     background: var(--card-hover-bg);
     border-color: var(--card-hover-border);
     transform: translateY(-4px);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
   }
 
   /* Typography */
