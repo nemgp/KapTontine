@@ -357,23 +357,23 @@ export default function Organization() {
                         <div className="w-16 h-16 bg-purple-900/30 border border-purple-500/30 rounded-full flex items-center justify-center mx-auto mb-6">
                             <ShieldAlert className="text-purple-400" size={32} />
                         </div>
-                        <h2 className="text-xl font-bold text-white mb-2">Limite de membres atteinte</h2>
-                        <p className="text-sm text-slate-400 mb-6">
+                        <h2 className="text-xl font-bold text-[var(--text-color)] mb-2">Limite de membres atteinte</h2>
+                        <p className="text-sm text-[var(--text-muted)] mb-6">
                             Votre réunion gratuite est limitée à 5 membres. Pour ajouter de nouveaux membres et débloquer toutes les fonctionnalités illimitées, passez au plan Premium.
                         </p>
                         
-                        <div className="p-4 bg-purple-900/20 border border-purple-500/30 rounded-xl mb-6 flex justify-between items-center text-left">
+                        <div className="p-4 bg-purple-500/10 border border-purple-500/20 rounded-xl mb-6 flex justify-between items-center text-left">
                             <div>
-                                <span className="block text-sm font-bold text-white">Formule Premium</span>
-                                <span className="text-xs text-slate-400">Membres illimités (Paiement unique)</span>
+                                <span className="block text-sm font-bold text-[var(--text-color)]">Formule Premium</span>
+                                <span className="text-xs text-[var(--text-muted)]">Membres illimités (Paiement unique)</span>
                             </div>
-                            <span className="text-xl font-bold text-white">10,00 €</span>
+                            <span className="text-xl font-bold text-[var(--text-color)]">10,00 €</span>
                         </div>
 
                         <div className="flex gap-3 justify-end mt-8">
                             <button 
                                 onClick={() => setShowUpgradeModal(false)}
-                                className="px-4 py-2 text-slate-300 hover:bg-white/5 rounded-lg transition-colors cursor-pointer"
+                                className="px-4 py-2 text-[var(--text-muted)] hover:bg-[rgba(255,255,255,0.05)] rounded-lg transition-colors cursor-pointer"
                                 disabled={isUpgrading}
                             >
                                 Annuler

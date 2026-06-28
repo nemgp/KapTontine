@@ -73,6 +73,13 @@
     border-color: var(--border-color);
   }
 
+  .btn:disabled {
+    @apply opacity-40 cursor-not-allowed pointer-events-none;
+    box-shadow: none !important;
+    background-color: var(--text-muted) !important;
+    color: var(--bg-color) !important;
+  }
+
   /* Glassmorphism & High-Tech Cards */
   .glass-panel {
     @apply backdrop-blur-2xl;

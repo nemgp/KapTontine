@@ -231,38 +231,38 @@ export default function GlobalDashboard() {
                 {showCreateModal && (
                     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
                         <div className="glass-card w-full max-w-md border border-purple-500/30">
-                            <h2 className="text-xl font-bold text-white mb-4">
+                            <h2 className="text-xl font-bold text-[var(--text-color)] mb-4">
                                 {!hasFreeReunionUsed ? 'Créer votre Réunion Gratuite' : 'Créer une Réunion Premium'}
                             </h2>
-                            <p className="text-sm text-slate-400 mb-6">
+                            <p className="text-sm text-[var(--text-muted)] mb-6">
                                 {!hasFreeReunionUsed 
                                     ? 'Votre première réunion est 100% gratuite et limitée à 5 membres maximum. Vous pouvez y ajouter des participants librement.' 
                                     : 'Vous possédez déjà une réunion. La création de réunions supplémentaires coûte 10€ pour une durée de 2 ans.'}
-                                <br />Vous en serez automatiquement l\'Administrateur (Président).
+                                <br />Vous en serez automatiquement l'Administrateur (Président).
                             </p>
                             
                             <form onSubmit={handleCreateReunion} className="space-y-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-slate-300 mb-2">Nom de la réunion</label>
+                                    <label className="block text-sm font-medium text-[var(--text-color)] opacity-80 mb-2">Nom de la réunion</label>
                                     <input
                                         type="text"
                                         value={newReunionName}
                                         onChange={(e) => setNewReunionName(e.target.value)}
-                                        className="w-full p-3 bg-slate-900/50 border border-white/10 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none text-white placeholder-slate-600"
+                                        className="w-full p-3 bg-[var(--input-bg)] border border-[var(--border-color)] rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none text-[var(--text-color)] placeholder-slate-500"
                                         placeholder="Ex: Tontine Family"
                                         required
                                         disabled={isCreating}
                                     />
                                 </div>
                                 
-                                <div className="p-4 bg-purple-900/20 border border-purple-500/30 rounded-xl mb-6">
+                                <div className="p-4 bg-purple-500/10 border border-purple-500/20 rounded-xl mb-6">
                                     <div className="flex justify-between items-center mb-2">
-                                        <span className="text-slate-300">Total à payer :</span>
-                                        <span className="text-xl font-bold text-white">
+                                        <span className="text-[var(--text-muted)]">Total à payer :</span>
+                                        <span className="text-xl font-bold text-[var(--text-color)]">
                                             {!hasFreeReunionUsed ? '0,00 €' : '10,00 €'}
                                         </span>
                                     </div>
-                                    <div className="flex items-center gap-2 text-xs text-slate-400">
+                                    <div className="flex items-center gap-2 text-xs text-[var(--text-muted)]">
                                         <CreditCard size={14} />
                                         <span>
                                             {!hasFreeReunionUsed ? 'Aucune carte requise' : 'Paiement sécurisé via Stripe'}
@@ -274,7 +274,7 @@ export default function GlobalDashboard() {
                                     <button 
                                         type="button" 
                                         onClick={() => setShowCreateModal(false)}
-                                        className="px-4 py-2 text-slate-300 hover:bg-white/5 rounded-lg transition-colors cursor-pointer"
+                                        className="px-4 py-2 text-[var(--text-muted)] hover:bg-[rgba(255,255,255,0.05)] rounded-lg transition-colors cursor-pointer"
                                         disabled={isCreating}
                                     >
                                         Annuler
