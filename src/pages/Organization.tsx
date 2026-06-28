@@ -348,7 +348,7 @@ export default function Organization() {
                                             {member.profiles?.avatar ? (
                                                 <img src={member.profiles.avatar} alt="" className="w-full h-full object-cover" />
                                             ) : (() => {
-                                                const animal = getSavannaAnimal(member.profiles?.id || member.profiles?.email || '');
+                                                const animal = getSavannaAnimal(member.profiles?.email || '');
                                                 return (
                                                     <div 
                                                         className={`w-full h-full bg-gradient-to-tr ${animal.color} flex items-center justify-center text-3xl shadow-inner`} 
