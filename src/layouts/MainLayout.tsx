@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { useReunion } from '../context/ReunionContext';
 import { useState } from 'react';
 import { useTheme } from '../context/ThemeContext';
+import { getSavannaAnimal } from '../lib/savanna';
 import logo from '../assets/logo.png';
 
 interface MainLayoutProps {
@@ -87,7 +88,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
                     {canEdit && (
                         <NavLink
                             to="organisation"
-                            className="hidden lg:flex items-center gap-1 px-2.5 py-1.5 text-[11px] text-purple-300 hover:bg-white/5 rounded-lg transition-colors border border-purple-500/20 bg-purple-500/10"
+                            className="hidden lg:flex items-center gap-1 px-2.5 py-1.5 text-[11px] text-purple-700 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-white/5 rounded-lg transition-colors border border-purple-300 dark:border-purple-500/20 bg-purple-50 dark:bg-purple-500/10 font-bold"
                         >
                             <Settings size={13} />
                             Gérer
@@ -102,11 +103,17 @@ export default function MainLayout({ children }: MainLayoutProps) {
                     >
                         {profile?.avatar ? (
                             <img src={profile.avatar} alt="Avatar" className="w-8 h-8 rounded-full border border-white/20 object-cover shrink-0" />
-                        ) : (
-                            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-purple-600 to-blue-600 flex items-center justify-center text-xs font-bold border border-white/20 shadow-inner text-white shrink-0">
-                                {profile?.nom?.charAt(0).toUpperCase() || profile?.email?.charAt(0).toUpperCase() || 'U'}
-                            </div>
-                        )}
+                        ) : (() => {
+                            const animal = getSavannaAnimal(profile?.id || profile?.email || '');
+                            return (
+                                <div 
+                                    className={`w-8 h-8 rounded-full bg-gradient-to-tr ${animal.color} flex items-center justify-center text-sm border border-white/20 shadow-sm shrink-0`} 
+                                    title={animal.label}
+                                >
+                                    {animal.emoji}
+                                </div>
+                            );
+                        })()}
                     </button>
 
                     {/* Logout */}

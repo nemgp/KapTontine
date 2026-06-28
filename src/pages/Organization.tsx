@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Trash2, Edit2, Check, X, Loader2, UserPlus, CreditCard, ShieldAlert } from 'lucide-react';
+import { Trash2, Edit2, Check, X, Loader2, UserPlus, CreditCard, ShieldAlert, Edit } from 'lucide-react';
 import { useReunion } from '../context/ReunionContext';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
+import { getSavannaAnimal } from '../lib/savanna';
 
 interface Member {
     id: string;
@@ -32,8 +33,38 @@ export default function Organization() {
     
     const [showUpgradeModal, setShowUpgradeModal] = useState(false);
     const [isUpgrading, setIsUpgrading] = useState(false);
+    
+    const [editReunionName, setEditReunionName] = useState('');
+    const [isRenaming, setIsRenaming] = useState(false);
 
     const isAdmin = userRole === 'admin';
+
+    useEffect(() => {
+        if (reunion) {
+            setEditReunionName(reunion.nom);
+        }
+    }, [reunion]);
+
+    const handleRenameReunion = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!reunion || !editReunionName.trim()) return;
+        setIsRenaming(true);
+        try {
+            const { error } = await supabase
+                .from('reunions')
+                .update({ nom: editReunionName.trim() })
+                .eq('id', reunion.id);
+
+            if (error) throw error;
+            alert("Le nom de la réunion a été modifié avec succès !");
+            window.location.reload();
+        } catch (err) {
+            console.error("Error renaming reunion:", err);
+            alert("Erreur lors de la modification du nom.");
+        } finally {
+            setIsRenaming(false);
+        }
+    };
 
     useEffect(() => {
         if (reunion?.id) {
@@ -232,39 +263,74 @@ export default function Organization() {
 
                     {/* Invite Section (Admins Only) */}
                     {isAdmin && (
-                        <div className="glass-card border-dashed border-2 border-white/5 hover:border-purple-500/30 transition-all">
-                            <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                                <UserPlus size={20} className="text-purple-400" />
-                                Inviter un membre
-                            </h2>
-                            <form onSubmit={handleAddMember} className="flex flex-col md:flex-row gap-4">
-                                <input
-                                    type="email"
-                                    value={newMemberEmail}
-                                    onChange={(e) => setNewMemberEmail(e.target.value)}
-                                    placeholder="Email de l'utilisateur"
-                                    className="flex-1 p-3 bg-slate-900/50 border border-white/10 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none text-white"
-                                    required
-                                />
-                                <input
-                                    type="text"
-                                    value={newMemberPoste}
-                                    onChange={(e) => setNewMemberPoste(e.target.value)}
-                                    placeholder="Poste (ex: Trésorier)"
-                                    className="w-full md:w-48 p-3 bg-slate-900/50 border border-white/10 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none text-white"
-                                    required
-                                />
-                                <button 
-                                    type="submit" 
-                                    className="btn btn-primary px-8"
-                                    disabled={isAddingMember}
-                                >
-                                    {isAddingMember ? <Loader2 className="animate-spin" size={20} /> : 'Ajouter'}
-                                </button>
-                            </form>
-                            <p className="text-[10px] text-slate-500 mt-2">
-                                L'utilisateur doit déjà avoir un compte KapTontine.
-                            </p>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            {/* Rename Reunion Panel */}
+                            <div className="glass-card">
+                                <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                                    <Edit size={20} className="text-purple-400" />
+                                    Paramètres de la réunion
+                                </h2>
+                                <form onSubmit={handleRenameReunion} className="space-y-4">
+                                    <div>
+                                        <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+                                            Nom de la réunion
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={editReunionName}
+                                            onChange={(e) => setEditReunionName(e.target.value)}
+                                            className="w-full p-3 bg-slate-900/50 border border-white/10 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none text-white font-medium"
+                                            required
+                                            disabled={isRenaming}
+                                        />
+                                    </div>
+                                    <button
+                                        type="submit"
+                                        className="btn btn-primary w-full shadow-md"
+                                        disabled={isRenaming || editReunionName.trim() === reunion?.nom}
+                                    >
+                                        {isRenaming ? <Loader2 className="animate-spin" size={16} /> : 'Enregistrer le nouveau nom'}
+                                    </button>
+                                </form>
+                            </div>
+
+                            {/* Invite Section */}
+                            <div className="glass-card border-dashed border-2 border-white/5 hover:border-purple-500/30 transition-all flex flex-col justify-between">
+                                <div>
+                                    <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                                        <UserPlus size={20} className="text-purple-400" />
+                                        Inviter un membre
+                                    </h2>
+                                    <form onSubmit={handleAddMember} className="flex flex-col gap-4">
+                                        <input
+                                            type="email"
+                                            value={newMemberEmail}
+                                            onChange={(e) => setNewMemberEmail(e.target.value)}
+                                            placeholder="Email de l'utilisateur"
+                                            className="p-3 bg-slate-900/50 border border-white/10 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none text-white"
+                                            required
+                                        />
+                                        <input
+                                            type="text"
+                                            value={newMemberPoste}
+                                            onChange={(e) => setNewMemberPoste(e.target.value)}
+                                            placeholder="Poste (ex: Trésorier)"
+                                            className="p-3 bg-slate-900/50 border border-white/10 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none text-white"
+                                            required
+                                        />
+                                        <button 
+                                            type="submit" 
+                                            className="btn btn-primary w-full"
+                                            disabled={isAddingMember}
+                                        >
+                                            {isAddingMember ? <Loader2 className="animate-spin" size={20} /> : 'Ajouter'}
+                                        </button>
+                                    </form>
+                                    <p className="text-[10px] text-slate-500 mt-2">
+                                        L'utilisateur doit déjà avoir un compte KapTontine.
+                                    </p>
+                                </div>
+                            </div>
                         </div>
                     )}
 
@@ -278,14 +344,20 @@ export default function Organization() {
                             {members.map((member) => (
                                 <div key={member.id} className="glass-card group hover:border-purple-500/50">
                                     <div className="flex items-center gap-4">
-                                        <div className="w-16 h-16 rounded-full bg-slate-800 border-2 border-white/10 overflow-hidden shrink-0">
+                                        <div className="w-16 h-16 rounded-full border-2 border-white/10 overflow-hidden shrink-0">
                                             {member.profiles?.avatar ? (
                                                 <img src={member.profiles.avatar} alt="" className="w-full h-full object-cover" />
-                                            ) : (
-                                                <div className="w-full h-full flex items-center justify-center font-bold text-xl text-slate-400">
-                                                    {member.profiles?.nom?.charAt(0) || 'U'}
-                                                </div>
-                                            )}
+                                            ) : (() => {
+                                                const animal = getSavannaAnimal(member.profiles?.id || member.profiles?.email || '');
+                                                return (
+                                                    <div 
+                                                        className={`w-full h-full bg-gradient-to-tr ${animal.color} flex items-center justify-center text-3xl shadow-inner`} 
+                                                        title={animal.label}
+                                                    >
+                                                        {animal.emoji}
+                                                    </div>
+                                                );
+                                            })()}
                                         </div>
                                         <div className="flex-1 min-w-0">
                                             <h3 className="font-bold text-white truncate">{member.profiles?.nom}</h3>
