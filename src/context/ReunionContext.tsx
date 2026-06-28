@@ -8,6 +8,7 @@ interface Reunion {
     id: string;
     nom: string;
     description: string;
+    is_premium: boolean;
 }
 
 interface ReunionContextType {
@@ -39,7 +40,7 @@ export function ReunionProvider({ children }: { children: ReactNode }) {
                 const { data, error } = await supabase
                     .from('membres_reunion')
                     .select(`
-                        reunions ( id, nom, description ),
+                        reunions ( id, nom, description, is_premium ),
                         role,
                         poste
                     `)

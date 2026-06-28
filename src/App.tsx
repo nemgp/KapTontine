@@ -13,6 +13,8 @@ import Profile from './pages/Profile';
 import PaymentSuccess from './pages/PaymentSuccess';
 import PaymentCancel from './pages/PaymentCancel';
 
+import { ThemeProvider } from './context/ThemeContext';
+
 function PrivateRoute({ children }: { children: React.ReactNode }) {
     const { isAuthenticated, isLoading } = useAuth();
     if (isLoading) return null;
@@ -32,28 +34,30 @@ function ReunionLayout() {
 export default function App() {
     return (
         <BrowserRouter basename={import.meta.env.BASE_URL}>
-            <AuthProvider>
-                <Routes>
-                    <Route path="/login" element={<Login />} />
-                    
-                    {/* Routes Protégées Globales */}
-                    <Route path="/" element={<PrivateRoute><GlobalDashboard /></PrivateRoute>} />
-                    <Route path="/profil" element={<PrivateRoute><Profile /></PrivateRoute>} />
-                    <Route path="/success" element={<PrivateRoute><PaymentSuccess /></PrivateRoute>} />
-                    <Route path="/cancel" element={<PrivateRoute><PaymentCancel /></PrivateRoute>} />
-                    
-                    {/* Routes Protégées spécifiques à une Réunion */}
-                    <Route path="/reunions/:reunionId" element={<PrivateRoute><ReunionLayout /></PrivateRoute>}>
-                        <Route index element={<ReunionDashboard />} />
-                        <Route path="organisation" element={<Organization />} />
-                        <Route path="finance" element={<Finance />} />
-                        <Route path="social" element={<Social />} />
-                        <Route path="documents" element={<Documents />} />
-                    </Route>
-                    
-                    <Route path="*" element={<Navigate to="/" />} />
-                </Routes>
-            </AuthProvider>
+            <ThemeProvider>
+                <AuthProvider>
+                    <Routes>
+                        <Route path="/login" element={<Login />} />
+                        
+                        {/* Routes Protégées Globales */}
+                        <Route path="/" element={<PrivateRoute><GlobalDashboard /></PrivateRoute>} />
+                        <Route path="/profil" element={<PrivateRoute><Profile /></PrivateRoute>} />
+                        <Route path="/success" element={<PrivateRoute><PaymentSuccess /></PrivateRoute>} />
+                        <Route path="/cancel" element={<PrivateRoute><PaymentCancel /></PrivateRoute>} />
+                        
+                        {/* Routes Protégées spécifiques à une Réunion */}
+                        <Route path="/reunions/:reunionId" element={<PrivateRoute><ReunionLayout /></PrivateRoute>}>
+                            <Route index element={<ReunionDashboard />} />
+                            <Route path="organisation" element={<Organization />} />
+                            <Route path="finance" element={<Finance />} />
+                            <Route path="social" element={<Social />} />
+                            <Route path="documents" element={<Documents />} />
+                        </Route>
+                        
+                        <Route path="*" element={<Navigate to="/" />} />
+                    </Routes>
+                </AuthProvider>
+            </ThemeProvider>
         </BrowserRouter>
     );
 }

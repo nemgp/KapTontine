@@ -42,43 +42,75 @@ serve(async (req) => {
       
       const userId = session.metadata?.userId || session.client_reference_id
       const reunionName = session.metadata?.reunionName
+      const reunionId = session.metadata?.reunionId
+      const type = session.metadata?.type || 'new_reunion'
+      const userEmail = session.customer_details?.email || ''
 
-      if (!userId || !reunionName) {
-        throw new Error('Missing metadata in session')
+      if (!userId) {
+        throw new Error('Missing userId in session')
       }
 
-      console.log(`Payment successful for user ${userId}, creating reunion: ${reunionName}`)
+      // 0. Ensure profile exists (in case trigger failed)
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .upsert({
+          id: userId,
+          email: userEmail,
+          nom: userEmail ? userEmail.split('@')[0] : 'Membre',
+        }, { onConflict: 'id', ignoreDuplicates: true })
 
-      const expiryDate = new Date()
-      expiryDate.setFullYear(expiryDate.getFullYear() + 2) // 2 years duration
+      if (profileError) {
+        console.error('Profile upsert error (non-fatal):', profileError)
+      }
 
-      // 1. Create Reunion
-      const { data: reunionData, error: reunionError } = await supabase
-        .from('reunions')
-        .insert({
-          nom: reunionName,
-          description: "Nouvelle réunion KapTontine",
-          date_expiration: expiryDate.toISOString(),
-          id_createur: userId
-        })
-        .select()
-        .single()
+      if (type === 'upgrade_reunion' && reunionId) {
+        console.log(`Upgrading reunion ${reunionId} to Premium`)
+        const { error: updateError } = await supabase
+          .from('reunions')
+          .update({ is_premium: true })
+          .eq('id', reunionId)
 
-      if (reunionError) throw reunionError
+        if (updateError) throw updateError
+        console.log(`Successfully upgraded reunion ${reunionId} to Premium`)
+      } else {
+        if (!reunionName) {
+          throw new Error('Missing reunionName in session metadata for new creation')
+        }
 
-      // 2. Add user as admin
-      if (reunionData) {
-        const { error: memberError } = await supabase
-          .from('membres_reunion')
+        console.log(`Payment successful for user ${userId}, creating paid reunion: ${reunionName}`)
+
+        const expiryDate = new Date()
+        expiryDate.setFullYear(expiryDate.getFullYear() + 2) // 2 years duration
+
+        // 1. Create Reunion
+        const { data: reunionData, error: reunionError } = await supabase
+          .from('reunions')
           .insert({
-            id_reunion: reunionData.id,
-            id_profile: userId,
-            role: 'admin',
-            poste: 'Président'
+            nom: reunionName,
+            description: "Nouvelle réunion KapTontine (Premium)",
+            date_expiration: expiryDate.toISOString(),
+            id_createur: userId,
+            is_premium: true
           })
+          .select()
+          .single()
 
-        if (memberError) throw memberError
-        console.log(`Successfully created reunion ${reunionData.id} and added member ${userId}`)
+        if (reunionError) throw reunionError
+
+        // 2. Add user as admin
+        if (reunionData) {
+          const { error: memberError } = await supabase
+            .from('membres_reunion')
+            .insert({
+              id_reunion: reunionData.id,
+              id_profile: userId,
+              role: 'admin',
+              poste: 'Président'
+            })
+
+          if (memberError) throw memberError
+          console.log(`Successfully created premium reunion ${reunionData.id} and added member ${userId}`)
+        }
       }
     }
 

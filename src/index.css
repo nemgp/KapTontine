@@ -6,17 +6,49 @@
     --valorant-cyan: #00F5FF;
     --valorant-dark: #0F111A;
     --valorant-slate: #1F2326;
+    
+    /* Default theme variables (Dark) */
+    --bg-color: #0F111A;
+    --text-color: #F8FAFC;
+    --text-muted: #94A3B8;
+    --card-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%);
+    --card-hover-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);
+    --card-border: rgba(255, 255, 255, 0.1);
+    --card-hover-border: rgba(255, 255, 255, 0.2);
+    --panel-bg: rgba(15, 17, 26, 0.85);
+    --border-color: rgba(255, 255, 255, 0.1);
+    --input-bg: rgba(0, 0, 0, 0.4);
+    --radial-red: rgba(255, 70, 85, 0.05);
+    --radial-cyan: rgba(0, 245, 255, 0.05);
+  }
+
+  :root.light {
+    /* Light theme variables */
+    --bg-color: #F1F5F9;
+    --text-color: #0F172A;
+    --text-muted: #475569;
+    --card-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%);
+    --card-hover-bg: linear-gradient(135deg, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 255, 0.8) 100%);
+    --card-border: rgba(15, 23, 42, 0.08);
+    --card-hover-border: rgba(157, 23, 77, 0.2); /* Slight pink/purple hint for light mode active hover */
+    --panel-bg: rgba(255, 255, 255, 0.9);
+    --border-color: rgba(15, 23, 42, 0.08);
+    --input-bg: rgba(255, 255, 255, 0.9);
+    --radial-red: rgba(255, 70, 85, 0.03);
+    --radial-cyan: rgba(0, 245, 255, 0.03);
   }
 
   body {
-    @apply text-slate-100 min-h-screen;
-    background-color: var(--valorant-dark);
+    color: var(--text-color);
+    min-height: 100vh;
+    background-color: var(--bg-color);
     background-image: 
-      radial-gradient(at 0% 0%, rgba(255, 70, 85, 0.05) 0px, transparent 50%),
-      radial-gradient(at 100% 0%, rgba(0, 245, 255, 0.05) 0px, transparent 50%),
-      radial-gradient(at 100% 100%, rgba(255, 70, 85, 0.05) 0px, transparent 50%),
-      radial-gradient(at 0% 100%, rgba(0, 245, 255, 0.05) 0px, transparent 50%);
+      radial-gradient(at 0% 0%, var(--radial-red) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, var(--radial-cyan) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, var(--radial-red) 0px, transparent 50%),
+      radial-gradient(at 0% 100%, var(--radial-cyan) 0px, transparent 50%);
     background-attachment: fixed;
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
 }
 
@@ -37,30 +69,33 @@
   }
 
   .btn-outline {
-    @apply border-2 border-white/20 text-white hover:bg-white/10 hover:border-white/40;
+    @apply border-2 text-[var(--text-color)] hover:bg-[rgba(255,255,255,0.05)];
+    border-color: var(--border-color);
   }
 
   /* Glassmorphism & High-Tech Cards */
   .glass-panel {
-    @apply backdrop-blur-2xl border-white/5;
-    background-color: rgba(15, 17, 26, 0.8);
+    @apply backdrop-blur-2xl;
+    background-color: var(--panel-bg);
+    border-color: var(--border-color);
   }
 
   .glass-card {
-    @apply backdrop-blur-xl rounded-[20px] p-6 border border-white/10 shadow-2xl transition-all duration-500;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%);
+    @apply backdrop-blur-xl rounded-[20px] p-6 border shadow-2xl transition-all duration-500;
+    background: var(--card-bg);
+    border-color: var(--card-border);
   }
 
   .glass-card:hover {
-    @apply border-white/20;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);
+    background: var(--card-hover-bg);
+    border-color: var(--card-hover-border);
     transform: translateY(-4px);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
   }
 
   /* Typography */
   .text-primary {
-    @apply text-white;
+    color: var(--text-color);
   }
 
   .text-accent-red {
@@ -73,7 +108,8 @@
 
   /* Progress Bar Valorant Style */
   .progress-container {
-    @apply w-full h-1 bg-white/10 rounded-full overflow-hidden relative;
+    @apply w-full h-1 rounded-full overflow-hidden relative;
+    background-color: var(--border-color);
   }
 
   .progress-bar {
@@ -90,10 +126,10 @@
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(147, 51, 234, 0.1);
     border-radius: 10px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(147, 51, 234, 0.2);
   }
 }

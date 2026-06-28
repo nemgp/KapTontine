@@ -1,9 +1,10 @@
 import type { ReactNode } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Users, Wallet, HeartHandshake, FileText, Menu, X, LogOut, ArrowLeft, Settings } from 'lucide-react';
+import { LayoutDashboard, Users, Wallet, HeartHandshake, FileText, Menu, X, LogOut, ArrowLeft, Settings, Sun, Moon } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useReunion } from '../context/ReunionContext';
 import { useState } from 'react';
+import { useTheme } from '../context/ThemeContext';
 import logo from '../assets/logo.png';
 
 interface MainLayoutProps {
@@ -13,6 +14,7 @@ interface MainLayoutProps {
 export default function MainLayout({ children }: MainLayoutProps) {
     const { profile, logout } = useAuth();
     const { reunion, userRole, userPoste } = useReunion();
+    const { theme, toggleTheme } = useTheme();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const navigate = useNavigate();
 
@@ -111,6 +113,23 @@ export default function MainLayout({ children }: MainLayoutProps) {
                             </NavLink>
                         </div>
                     )}
+
+                    <button
+                        onClick={toggleTheme}
+                        className="w-full flex items-center gap-2 px-4 py-2 text-sm text-slate-300 hover:bg-white/5 rounded-lg transition-colors cursor-pointer mb-2"
+                    >
+                        {theme === 'dark' ? (
+                            <>
+                                <Sun size={16} className="text-yellow-400" />
+                                Mode Clair
+                            </>
+                        ) : (
+                            <>
+                                <Moon size={16} className="text-blue-400" />
+                                Mode Sombre
+                            </>
+                        )}
+                    </button>
 
                     <button
                         onClick={logout}

@@ -18,11 +18,20 @@ serve(async (req) => {
   }
 
   try {
-    const { reunionName, userId } = await req.json()
+    const { reunionName, userId, reunionId, type } = await req.json()
 
-    if (!reunionName || !userId) {
+    if (!userId) {
       return new Response(
-        JSON.stringify({ error: 'reunionName and userId are required' }),
+        JSON.stringify({ error: 'userId is required' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    const isUpgrade = type === 'upgrade_reunion' && reunionId
+
+    if (!isUpgrade && !reunionName) {
+      return new Response(
+        JSON.stringify({ error: 'reunionName is required for new reunions' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
@@ -30,8 +39,12 @@ serve(async (req) => {
     // Determine return URL based on request origin or env var
     // For GitHub Pages, use the production URL if available
     const origin = req.headers.get('origin') || 'http://localhost:5173'
-    const successUrl = `${origin}/success?session_id={CHECKOUT_SESSION_ID}`
-    const cancelUrl = `${origin}/cancel`
+    const successUrl = isUpgrade 
+      ? `${origin}/KapTontine/reunions/${reunionId}/organisation?success=true`
+      : `${origin}/KapTontine/success?session_id={CHECKOUT_SESSION_ID}`
+    const cancelUrl = isUpgrade
+      ? `${origin}/KapTontine/reunions/${reunionId}/organisation`
+      : `${origin}/KapTontine/cancel`
 
     // Create Stripe Checkout Session
     const session = await stripe.checkout.sessions.create({
@@ -41,8 +54,8 @@ serve(async (req) => {
           price_data: {
             currency: 'eur',
             product_data: {
-              name: `Création Réunion: ${reunionName}`,
-              description: 'Frais de création de la réunion (valable 2 ans)',
+              name: isUpgrade ? `Mise à niveau Premium: ${reunionName || 'Réunion'}` : `Création Réunion: ${reunionName}`,
+              description: isUpgrade ? 'Déblocage des membres illimités pour cette réunion' : 'Frais de création de la réunion (valable 2 ans)',
             },
             unit_amount: 1000, // 10.00 EUR (Stripe uses cents)
           },
@@ -54,8 +67,10 @@ serve(async (req) => {
       cancel_url: cancelUrl,
       client_reference_id: userId,
       metadata: {
-        reunionName: reunionName,
+        reunionName: reunionName || '',
         userId: userId,
+        reunionId: reunionId || '',
+        type: type || 'new_reunion',
       },
     })
 

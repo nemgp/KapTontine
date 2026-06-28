@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { AlertCircle, Loader2, ArrowRight, Shield, TrendingUp, Users } from 'lucide-react';
+import { AlertCircle, Loader2, ArrowRight, Shield, TrendingUp, Users, Sun, Moon } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTheme } from '../context/ThemeContext';
 import logo from '../assets/logo.png';
 
 const features = [
@@ -31,6 +32,7 @@ export default function Login() {
     const [isSignUp, setIsSignUp] = useState(false);
     const [currentFeature, setCurrentFeature] = useState(0);
     const { login } = useAuth();
+    const { theme, toggleTheme } = useTheme();
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -124,6 +126,15 @@ export default function Login() {
 
             {/* Right Side: Login Form */}
             <div className="w-full lg:w-2/5 flex items-center justify-center p-8 relative">
+                {/* Theme Toggle Button */}
+                <button
+                    onClick={toggleTheme}
+                    className="absolute top-6 right-6 p-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all text-slate-300 hover:text-white cursor-pointer z-20"
+                    title={theme === 'dark' ? 'Activer le mode clair' : 'Activer le mode sombre'}
+                >
+                    {theme === 'dark' ? <Sun size={18} className="text-yellow-400" /> : <Moon size={18} className="text-blue-400" />}
+                </button>
+
                 {/* Background elements */}
                 <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-20">
                     <div className="absolute top-[-10%] left-[-10%] w-[80%] h-[80%] bg-[var(--valorant-red)] opacity-[0.05] blur-[120px]"></div>

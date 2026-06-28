@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Trash2, Edit2, Check, X, Loader2, UserPlus } from 'lucide-react';
+import { Trash2, Edit2, Check, X, Loader2, UserPlus, CreditCard, ShieldAlert } from 'lucide-react';
 import { useReunion } from '../context/ReunionContext';
+import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 
 interface Member {
@@ -17,6 +18,7 @@ interface Member {
 
 export default function Organization() {
     const { reunion, userRole } = useReunion();
+    const { user } = useAuth();
     const [activeTab, setActiveTab] = useState<'current' | 'history'>('current');
     const [members, setMembers] = useState<Member[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -27,6 +29,9 @@ export default function Organization() {
     const [editingMemberId, setEditingMemberId] = useState<string | null>(null);
     const [editPoste, setEditPoste] = useState('');
     const [editRole, setEditRole] = useState('');
+    
+    const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+    const [isUpgrading, setIsUpgrading] = useState(false);
 
     const isAdmin = userRole === 'admin';
 
@@ -53,9 +58,42 @@ export default function Organization() {
         }
     };
 
+    const handleUpgrade = async () => {
+        setIsUpgrading(true);
+        try {
+            const { data, error } = await supabase.functions.invoke('create-checkout', {
+                body: { 
+                    reunionName: reunion?.nom, 
+                    userId: user?.id,
+                    reunionId: reunion?.id,
+                    type: 'upgrade_reunion'
+                }
+            });
+
+            if (error) throw error;
+            if (data?.url) {
+                window.location.href = data.url;
+            } else {
+                throw new Error("Impossible d'obtenir l'URL de paiement.");
+            }
+        } catch (err) {
+            console.error("Upgrade error:", err);
+            alert("Erreur lors de la préparation de la mise à niveau.");
+        } finally {
+            setIsUpgrading(false);
+        }
+    };
+
     const handleAddMember = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!reunion) return;
+
+        // Check freemium limit (5 members maximum)
+        if (!reunion.is_premium && members.length >= 5) {
+            setShowUpgradeModal(true);
+            return;
+        }
+
         setIsAddingMember(true);
 
         try {
@@ -162,6 +200,36 @@ export default function Organization() {
 
             {activeTab === 'current' ? (
                 <div className="space-y-8">
+                    {/* Freemium Banner */}
+                    {!reunion?.is_premium ? (
+                        <div className="p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl flex flex-col md:flex-row justify-between items-center gap-4">
+                            <div>
+                                <h3 className="font-bold text-white flex items-center gap-2">
+                                    <span className="text-xs bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded uppercase font-black">Gratuit</span>
+                                    Réunion limitée à 5 membres maximum ({members.length} / 5)
+                                </h3>
+                                <p className="text-xs text-slate-400 mt-1">Vous devez passer au plan Premium pour inviter plus de 5 membres.</p>
+                            </div>
+                            {isAdmin && (
+                                <button
+                                    onClick={handleUpgrade}
+                                    disabled={isUpgrading}
+                                    className="btn btn-primary py-2 px-4 shadow-[0_0_15px_rgba(255,70,85,0.2)] flex items-center gap-2 cursor-pointer"
+                                >
+                                    {isUpgrading ? <Loader2 className="animate-spin" size={14} /> : <CreditCard size={14} />}
+                                    Passer en Premium (10€)
+                                </button>
+                            )}
+                        </div>
+                    ) : (
+                        <div className="p-4 bg-purple-500/10 border border-purple-500/30 rounded-xl">
+                            <h3 className="font-bold text-white flex items-center gap-2">
+                                <span className="text-xs bg-purple-500/20 text-purple-300 border border-purple-500/30 px-2 py-0.5 rounded uppercase font-black">Premium ✦</span>
+                                Réunion Premium — Nombre de membres illimité ({members.length} membres)
+                            </h3>
+                        </div>
+                    )}
+
                     {/* Invite Section (Admins Only) */}
                     {isAdmin && (
                         <div className="glass-card border-dashed border-2 border-white/5 hover:border-purple-500/30 transition-all">
@@ -279,6 +347,56 @@ export default function Organization() {
             ) : (
                 <div className="glass-card text-center py-20">
                     <p className="text-slate-400">L'historique des cycles précédents sera disponible bientôt.</p>
+                </div>
+            )}
+
+            {/* Modal Upgrade Premium */}
+            {showUpgradeModal && (
+                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                    <div className="glass-card w-full max-w-md border border-purple-500/30 text-center p-8">
+                        <div className="w-16 h-16 bg-purple-900/30 border border-purple-500/30 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <ShieldAlert className="text-purple-400" size={32} />
+                        </div>
+                        <h2 className="text-xl font-bold text-white mb-2">Limite de membres atteinte</h2>
+                        <p className="text-sm text-slate-400 mb-6">
+                            Votre réunion gratuite est limitée à 5 membres. Pour ajouter de nouveaux membres et débloquer toutes les fonctionnalités illimitées, passez au plan Premium.
+                        </p>
+                        
+                        <div className="p-4 bg-purple-900/20 border border-purple-500/30 rounded-xl mb-6 flex justify-between items-center text-left">
+                            <div>
+                                <span className="block text-sm font-bold text-white">Formule Premium</span>
+                                <span className="text-xs text-slate-400">Membres illimités (Paiement unique)</span>
+                            </div>
+                            <span className="text-xl font-bold text-white">10,00 €</span>
+                        </div>
+
+                        <div className="flex gap-3 justify-end mt-8">
+                            <button 
+                                onClick={() => setShowUpgradeModal(false)}
+                                className="px-4 py-2 text-slate-300 hover:bg-white/5 rounded-lg transition-colors cursor-pointer"
+                                disabled={isUpgrading}
+                            >
+                                Annuler
+                            </button>
+                            <button 
+                                onClick={handleUpgrade}
+                                className="btn btn-primary shadow-lg flex items-center gap-2 cursor-pointer"
+                                disabled={isUpgrading}
+                            >
+                                {isUpgrading ? (
+                                    <>
+                                        <Loader2 className="animate-spin" size={16} />
+                                        Mise à niveau...
+                                    </>
+                                ) : (
+                                    <>
+                                        <CreditCard size={16} />
+                                        Payer 10€
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>

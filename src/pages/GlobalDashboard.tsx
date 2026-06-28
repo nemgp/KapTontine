@@ -2,27 +2,46 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import { useNavigate } from 'react-router-dom';
-import { Plus, CreditCard, Loader2, ArrowRight } from 'lucide-react';
+import { Plus, CreditCard, Loader2, ArrowRight, Sun, Moon } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
 
 export default function GlobalDashboard() {
     const { user, profile } = useAuth();
+    const { theme, toggleTheme } = useTheme();
     const [reunions, setReunions] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [newReunionName, setNewReunionName] = useState('');
     const [isCreating, setIsCreating] = useState(false);
+    const [hasFreeReunionUsed, setHasFreeReunionUsed] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
         if (user) {
             fetchReunions();
+            checkFreeStatus();
         }
     }, [user]);
+
+    const checkFreeStatus = async () => {
+        if (!user) return;
+        try {
+            const { count, error } = await supabase
+                .from('reunions')
+                .select('*', { count: 'exact', head: true })
+                .eq('id_createur', user.id);
+            if (!error && count !== null) {
+                setHasFreeReunionUsed(count > 0);
+            }
+        } catch (err) {
+            console.error("Error checking free status:", err);
+        }
+    };
 
     const fetchReunions = async () => {
         setIsLoading(true);
         try {
-            // Get reunions the user is a member of
+                        // Get reunions the user is a member of
             const { data, error } = await supabase
                 .from('membres_reunion')
                 .select(`
@@ -30,7 +49,8 @@ export default function GlobalDashboard() {
                         id,
                         nom,
                         description,
-                        date_creation
+                        date_creation,
+                        is_premium
                     ),
                     role
                 `)
@@ -57,16 +77,56 @@ export default function GlobalDashboard() {
         setIsCreating(true);
 
         try {
-            const { data, error } = await supabase.functions.invoke('create-checkout', {
-                body: { reunionName: newReunionName, userId: user?.id }
-            });
+            if (!hasFreeReunionUsed) {
+                // First reunion is free
+                const expiryDate = new Date();
+                expiryDate.setFullYear(expiryDate.getFullYear() + 2); // 2 years from now
 
-            if (error) throw error;
-            
-            if (data?.url) {
-                window.location.href = data.url;
+                const { data: reunionData, error: reunionError } = await supabase
+                    .from('reunions')
+                    .insert({
+                        nom: newReunionName,
+                        description: "Réunion Gratuite (Max 5 membres)",
+                        date_expiration: expiryDate.toISOString(),
+                        id_createur: user?.id,
+                        is_premium: false
+                    })
+                    .select()
+                    .single();
+
+                if (reunionError) throw reunionError;
+
+                if (reunionData) {
+                    const { error: memberError } = await supabase
+                        .from('membres_reunion')
+                        .insert({
+                            id_reunion: reunionData.id,
+                            id_profile: user?.id,
+                            role: 'admin',
+                            poste: 'Président'
+                        });
+
+                    if (memberError) throw memberError;
+
+                    setShowCreateModal(false);
+                    setNewReunionName('');
+                    fetchReunions(); // Refresh list
+                    checkFreeStatus(); // Refresh status
+                    alert("Félicitations ! Votre première réunion (gratuite, max 5 membres) a été créée avec succès.");
+                }
             } else {
-                throw new Error("Impossible d'obtenir l'URL de paiement.");
+                // Paid reunion
+                const { data, error } = await supabase.functions.invoke('create-checkout', {
+                    body: { reunionName: newReunionName, userId: user?.id }
+                });
+
+                if (error) throw error;
+                
+                if (data?.url) {
+                    window.location.href = data.url;
+                } else {
+                    throw new Error("Impossible d'obtenir l'URL de paiement.");
+                }
             }
         } catch (err) {
             console.error("Erreur de création:", err);
@@ -90,13 +150,22 @@ export default function GlobalDashboard() {
                             <span className="text-xs bg-white/10 px-2 py-0.5 rounded-full border border-white/10">Mon Profil</span>
                         </button>
                     </div>
-                    <button 
-                        onClick={() => setShowCreateModal(true)}
-                        className="btn btn-primary shadow-lg shadow-purple-900/50 flex items-center gap-2"
-                    >
-                        <Plus size={18} />
-                        <span className="hidden md:inline">Créer une réunion</span>
-                    </button>
+                    <div className="flex items-center gap-3">
+                        <button
+                            onClick={toggleTheme}
+                            className="p-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all text-slate-300 hover:text-white cursor-pointer"
+                            title={theme === 'dark' ? 'Activer le mode clair' : 'Activer le mode sombre'}
+                        >
+                            {theme === 'dark' ? <Sun size={18} className="text-yellow-400" /> : <Moon size={18} className="text-blue-400" />}
+                        </button>
+                        <button 
+                            onClick={() => setShowCreateModal(true)}
+                            className="btn btn-primary shadow-lg shadow-purple-900/50 flex items-center gap-2"
+                        >
+                            <Plus size={18} />
+                            <span className="hidden md:inline">Créer une réunion</span>
+                        </button>
+                    </div>
                 </header>
 
                 {isLoading ? (
@@ -128,7 +197,20 @@ export default function GlobalDashboard() {
                                 className="glass-card cursor-pointer hover:bg-white/10 transition-all border border-white/20 hover:border-purple-500/50 group"
                             >
                                 <div className="flex justify-between items-start mb-4">
-                                    <h3 className="text-xl font-bold text-white group-hover:text-purple-300 transition-colors">{reunion.nom}</h3>
+                                    <div>
+                                        <h3 className="text-xl font-bold text-white group-hover:text-purple-300 transition-colors">{reunion.nom}</h3>
+                                        <div className="flex gap-2 mt-1.5">
+                                            {reunion.is_premium ? (
+                                                <span className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                                                    Premium ✦
+                                                </span>
+                                            ) : (
+                                                <span className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                                                    Gratuit
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
                                     <span className="text-[10px] uppercase tracking-wider px-2 py-1 rounded bg-black/20 text-slate-300">
                                         {reunion.userRole}
                                     </span>
@@ -149,10 +231,14 @@ export default function GlobalDashboard() {
                 {showCreateModal && (
                     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
                         <div className="glass-card w-full max-w-md border border-purple-500/30">
-                            <h2 className="text-xl font-bold text-white mb-4">Créer une Réunion</h2>
+                            <h2 className="text-xl font-bold text-white mb-4">
+                                {!hasFreeReunionUsed ? 'Créer votre Réunion Gratuite' : 'Créer une Réunion Premium'}
+                            </h2>
                             <p className="text-sm text-slate-400 mb-6">
-                                La création d'une réunion coûte 10€ pour une durée de 2 ans. 
-                                Vous en serez automatiquement l'Administrateur (Président).
+                                {!hasFreeReunionUsed 
+                                    ? 'Votre première réunion est 100% gratuite et limitée à 5 membres maximum. Vous pouvez y ajouter des participants librement.' 
+                                    : 'Vous possédez déjà une réunion. La création de réunions supplémentaires coûte 10€ pour une durée de 2 ans.'}
+                                <br />Vous en serez automatiquement l\'Administrateur (Président).
                             </p>
                             
                             <form onSubmit={handleCreateReunion} className="space-y-4">
@@ -172,11 +258,15 @@ export default function GlobalDashboard() {
                                 <div className="p-4 bg-purple-900/20 border border-purple-500/30 rounded-xl mb-6">
                                     <div className="flex justify-between items-center mb-2">
                                         <span className="text-slate-300">Total à payer :</span>
-                                        <span className="text-xl font-bold text-white">10,00 €</span>
+                                        <span className="text-xl font-bold text-white">
+                                            {!hasFreeReunionUsed ? '0,00 €' : '10,00 €'}
+                                        </span>
                                     </div>
                                     <div className="flex items-center gap-2 text-xs text-slate-400">
                                         <CreditCard size={14} />
-                                        <span>Paiement sécurisé via Stripe</span>
+                                        <span>
+                                            {!hasFreeReunionUsed ? 'Aucune carte requise' : 'Paiement sécurisé via Stripe'}
+                                        </span>
                                     </div>
                                 </div>
 
@@ -184,7 +274,7 @@ export default function GlobalDashboard() {
                                     <button 
                                         type="button" 
                                         onClick={() => setShowCreateModal(false)}
-                                        className="px-4 py-2 text-slate-300 hover:bg-white/5 rounded-lg transition-colors"
+                                        className="px-4 py-2 text-slate-300 hover:bg-white/5 rounded-lg transition-colors cursor-pointer"
                                         disabled={isCreating}
                                     >
                                         Annuler
@@ -197,8 +287,10 @@ export default function GlobalDashboard() {
                                         {isCreating ? (
                                             <>
                                                 <Loader2 className="animate-spin" size={16} />
-                                                Paiement en cours...
+                                                Création en cours...
                                             </>
+                                        ) : !hasFreeReunionUsed ? (
+                                            'Créer Gratuitement'
                                         ) : (
                                             'Payer 10€ et Créer'
                                         )}
