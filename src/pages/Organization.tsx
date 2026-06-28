@@ -27,6 +27,9 @@ export default function Organization() {
     const [newMemberEmail, setNewMemberEmail] = useState('');
     const [newMemberPoste, setNewMemberPoste] = useState('Membre');
     
+    const [showInviteModal, setShowInviteModal] = useState(false);
+    const [inviteEmail, setInviteEmail] = useState('');
+
     const [editingMemberId, setEditingMemberId] = useState<string | null>(null);
     const [editPoste, setEditPoste] = useState('');
     const [editRole, setEditRole] = useState('');
@@ -136,7 +139,9 @@ export default function Organization() {
                 .single();
 
             if (profileError || !profileData) {
-                alert("Utilisateur non trouvé. Demandez-lui de s'inscrire sur KapTontine d'abord.");
+                setInviteEmail(newMemberEmail);
+                setShowInviteModal(true);
+                setIsAddingMember(false);
                 return;
             }
 
@@ -150,6 +155,7 @@ export default function Organization() {
 
             if (existingMember) {
                 alert("Cet utilisateur est déjà membre de cette réunion.");
+                setIsAddingMember(false);
                 return;
             }
 
@@ -466,6 +472,54 @@ export default function Organization() {
                                         Payer 10€
                                     </>
                                 )}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal Inviter Utilisateur Externe */}
+            {showInviteModal && (
+                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                    <div className="glass-card w-full max-w-md border border-purple-500/30 text-center p-8">
+                        <div className="w-16 h-16 bg-purple-900/30 border border-purple-500/30 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <UserPlus className="text-purple-400" size={32} />
+                        </div>
+                        <h2 className="text-xl font-bold text-[var(--text-color)] mb-2">Utilisateur non trouvé</h2>
+                        <p className="text-sm text-[var(--text-muted)] mb-6">
+                            L'adresse <strong className="text-white">{inviteEmail}</strong> n'est pas encore enregistrée sur KapTontine. 
+                            Souhaitez-vous lui envoyer une invitation pour s'inscrire et rejoindre votre réunion ?
+                        </p>
+                        
+                        <div className="flex flex-col gap-3">
+                            <button 
+                                onClick={() => {
+                                    const subject = encodeURIComponent(`Invitation à rejoindre la réunion "${reunion?.nom}" sur KapTontine`);
+                                    const body = encodeURIComponent(`Bonjour,\n\nJe t'invite à rejoindre notre réunion "${reunion?.nom}" sur KapTontine.\n\nInscris-toi sur KapTontine via ce lien pour pouvoir y participer :\n${window.location.origin}${import.meta.env.BASE_URL}login\n\nÀ bientôt !`);
+                                    window.open(`mailto:${inviteEmail}?subject=${subject}&body=${body}`);
+                                    setShowInviteModal(false);
+                                }}
+                                className="btn btn-primary shadow-lg flex items-center justify-center gap-2 cursor-pointer w-full text-white font-bold"
+                            >
+                                ✉️ Envoyer un e-mail d'invitation
+                            </button>
+                            
+                            <button 
+                                onClick={() => {
+                                    const text = encodeURIComponent(`Bonjour, je t'invite à rejoindre notre réunion "${reunion?.nom}" sur KapTontine. Inscris-toi via ce lien :\n${window.location.origin}${import.meta.env.BASE_URL}login`);
+                                    window.open(`https://api.whatsapp.com/send?text=${text}`);
+                                    setShowInviteModal(false);
+                                }}
+                                className="btn btn-secondary shadow-lg flex items-center justify-center gap-2 cursor-pointer w-full text-slate-900 font-bold"
+                            >
+                                💬 Partager sur WhatsApp
+                            </button>
+                            
+                            <button 
+                                onClick={() => setShowInviteModal(false)}
+                                className="mt-2 px-4 py-2 text-xs text-[var(--text-muted)] hover:bg-[rgba(255,255,255,0.05)] rounded-lg transition-colors cursor-pointer"
+                            >
+                                Fermer
                             </button>
                         </div>
                     </div>
