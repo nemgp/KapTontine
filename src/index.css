@@ -36,6 +36,53 @@
     --input-bg: rgba(255, 255, 255, 0.9);
     --radial-red: rgba(255, 70, 85, 0.03);
     --radial-cyan: rgba(0, 245, 255, 0.03);
+    
+    /* Text color overrides for light mode */
+    .text-white {
+      color: #0F172A !important;
+    }
+    .text-slate-100 {
+      color: #0F172A !important;
+    }
+    .text-slate-200 {
+      color: #1E293B !important;
+    }
+    .text-slate-300 {
+      color: #475569 !important;
+    }
+    .text-slate-400 {
+      color: #475569 !important;
+    }
+    .text-slate-500 {
+      color: #64748B !important;
+    }
+    .text-purple-300 {
+      color: #7C3AED !important;
+    }
+    
+    /* Background/border overrides for light mode */
+    .bg-slate-900\/50 {
+      background-color: rgba(255, 255, 255, 0.6) !important;
+    }
+    .bg-white\/5 {
+      background-color: rgba(15, 23, 70, 0.05) !important;
+    }
+    .bg-white\/10 {
+      background-color: rgba(15, 23, 70, 0.08) !important;
+    }
+    .bg-black\/20 {
+      background-color: rgba(15, 23, 70, 0.06) !important;
+    }
+    .border-white\/10 {
+      border-color: rgba(15, 23, 70, 0.08) !important;
+    }
+    .border-white\/20 {
+      border-color: rgba(15, 23, 70, 0.12) !important;
+    }
+    .bg-purple-900\/20 {
+      background-color: rgba(124, 58, 237, 0.08) !important;
+      border-color: rgba(124, 58, 237, 0.15) !important;
+    }
   }
 
   body {

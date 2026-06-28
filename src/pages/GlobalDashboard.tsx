@@ -128,9 +128,9 @@ export default function GlobalDashboard() {
                     throw new Error("Impossible d'obtenir l'URL de paiement.");
                 }
             }
-        } catch (err) {
+        } catch (err: any) {
             console.error("Erreur de création:", err);
-            alert("Erreur lors de la création de la réunion.");
+            alert("Erreur lors de la création de la réunion: " + (err.message || err.error_description || JSON.stringify(err)));
         } finally {
             setIsCreating(false);
         }
