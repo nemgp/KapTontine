@@ -22,7 +22,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
         { path: '', label: 'Dashboard', icon: LayoutDashboard },
         { path: 'organisation', label: 'Organisation', icon: Users },
         { path: 'finance', label: 'Finances', icon: Wallet },
-        { path: 'social', label: 'Secours', icon: HeartHandshake },
+        { path: 'social', label: 'Actions', icon: HeartHandshake },
         { path: 'documents', label: 'Documents', icon: FileText },
     ];
 
