@@ -121,6 +121,14 @@
     color: var(--text-color) !important;
     border-right: 1px solid var(--border-color);
   }
+
+  /* Overrides to prevent text from turning invisible on hover in light mode */
+  .hover\:text-white:hover:not(.btn):not(.btn-primary):not(.btn-secondary):not(.bg-purple-600):not(.active) {
+    color: var(--text-color) !important;
+  }
+  .hover\:text-red-300:hover {
+    color: #DC2626 !important; /* red-600 */
+  }
 }
 
 @layer components {

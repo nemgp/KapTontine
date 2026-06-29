@@ -16,6 +16,7 @@ interface AuthContextType {
     login: (email: string, password: string) => Promise<void>;
     logout: () => Promise<void>;
     changePassword: (password: string) => Promise<void>;
+    refreshProfile: () => Promise<void>;
     isAuthenticated: boolean;
     isLoading: boolean;
 }
@@ -97,6 +98,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (error) throw new Error(error.message);
     };
 
+    const refreshProfile = async () => {
+        if (user) {
+            await fetchProfile(user.id);
+        }
+    };
+
     return (
         <AuthContext.Provider
             value={{
@@ -105,6 +112,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 login,
                 logout,
                 changePassword,
+                refreshProfile,
                 isAuthenticated: !!user,
                 isLoading
             }}

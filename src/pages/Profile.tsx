@@ -5,7 +5,7 @@ import { supabase } from '../lib/supabase';
 import { Loader2, Save, User, Image as ImageIcon, ArrowLeft } from 'lucide-react';
 
 export default function Profile() {
-    const { user, profile } = useAuth();
+    const { user, profile, refreshProfile } = useAuth();
     const navigate = useNavigate();
     const [nom, setNom] = useState(profile?.nom || '');
     const [avatarUrl, setAvatarUrl] = useState(profile?.avatar || '');
@@ -48,7 +48,9 @@ export default function Profile() {
 
             if (error) throw error;
 
-            setMessage({ type: 'success', text: 'Profil mis à jour avec succès. (Rechargez la page pour voir les changements partout)' });
+            await refreshProfile();
+
+            setMessage({ type: 'success', text: 'Profil mis à jour avec succès !' });
             setAvatarFile(null);
 
         } catch (error: any) {

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { CheckCircle, Clock, Banknote, Video, Loader2, TrendingUp } from 'lucide-react';
 import { useReunion } from '../context/ReunionContext';
 import { supabase } from '../lib/supabase';
+import { getSavannaAnimal } from '../lib/savanna';
 
 // Utilitaires Dates
 function getFirstSunday(year: number, month: number) {
@@ -48,7 +49,7 @@ export default function ReunionDashboard() {
         try {
             const { data, error } = await supabase
                 .from('membres_reunion')
-                .select('*, profiles(nom, avatar)')
+                .select('*, profiles(nom, email, avatar)')
                 .eq('id_reunion', reunion?.id);
 
             if (error) throw error;
@@ -112,6 +113,7 @@ export default function ReunionDashboard() {
         return {
             name: m.profiles?.nom,
             avatar: m.profiles?.avatar,
+            email: m.profiles?.email || m.id_profile || '',
             label: `${startDate.toLocaleDateString('fr-FR', { month: 'short' })} - ${endDate.toLocaleDateString('fr-FR', { month: 'short', year: 'numeric' })}`.toUpperCase(),
             status,
             amount: amount.toLocaleString('fr-FR')
@@ -167,11 +169,21 @@ export default function ReunionDashboard() {
                     <p className="text-3xl font-black text-white italic">{members.length}</p>
                     <div className="mt-4 flex items-center gap-2">
                          <div className="flex -space-x-2">
-                            {members.slice(0, 5).map((m, i) => (
-                                <div key={i} className="w-6 h-6 rounded-full border-2 border-[var(--valorant-dark)] bg-slate-800 overflow-hidden">
-                                    {m.profiles?.avatar ? <img src={m.profiles.avatar} /> : <div className="w-full h-full flex items-center justify-center text-[8px] font-bold">{m.profiles?.nom?.charAt(0)}</div>}
-                                </div>
-                            ))}
+                            {members.slice(0, 5).map((m, i) => {
+                                const avatar = m.profiles?.avatar;
+                                const animal = getSavannaAnimal(m.profiles?.email || m.id_profile || '');
+                                return (
+                                    <div key={i} className="w-6 h-6 rounded-full border-2 border-[var(--valorant-dark)] bg-slate-800 overflow-hidden flex items-center justify-center">
+                                        {avatar ? (
+                                            <img src={avatar} className="w-full h-full object-cover" />
+                                        ) : (
+                                            <div className={`w-full h-full bg-gradient-to-tr ${animal.color} flex items-center justify-center text-[10px]`} title={animal.label}>
+                                                {animal.emoji}
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })}
                          </div>
                          <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">En ligne</span>
                     </div>
@@ -206,12 +218,17 @@ export default function ReunionDashboard() {
                             <div className="flex items-center gap-4 mb-6">
                                 <div className="relative">
                                     <div className={`w-14 h-14 rounded-full p-0.5 ${item.status === 'current' ? 'bg-[var(--valorant-red)]' : 'bg-white/10'}`}>
-                                        <div className="w-full h-full rounded-full overflow-hidden bg-slate-900 flex items-center justify-center">
+                                        <div className="w-full h-full rounded-full overflow-hidden bg-slate-900 flex items-center justify-center border border-white/5">
                                             {item.avatar ? (
                                                 <img src={item.avatar} className="w-full h-full object-cover" />
-                                            ) : (
-                                                <span className="text-xl font-bold text-slate-600">{item.name?.charAt(0)}</span>
-                                            )}
+                                            ) : (() => {
+                                                const animal = getSavannaAnimal(item.email || '');
+                                                return (
+                                                    <div className={`w-full h-full bg-gradient-to-tr ${animal.color} flex items-center justify-center text-2xl`} title={animal.label}>
+                                                        {animal.emoji}
+                                                    </div>
+                                                );
+                                            })()}
                                         </div>
                                     </div>
                                     {item.status === 'current' && (

@@ -4,6 +4,7 @@ import { Plus, Edit2, Trash2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useReunion } from '../context/ReunionContext';
 import { supabase } from '../lib/supabase';
+import { useTheme } from '../context/ThemeContext';
 
 interface Loan {
     id: string;
@@ -26,6 +27,7 @@ interface Saving {
 export default function Finance() {
     const { user } = useAuth();
     const { reunion } = useReunion();
+    const { theme } = useTheme();
     const [activeTab, setActiveTab] = useState<'cotisations' | 'prets' | 'sanctions'>('cotisations');
 
     const [loans, setLoans] = useState<Loan[]>([]);
@@ -163,7 +165,7 @@ export default function Finance() {
                         <div className="glass-card">
                             <div className="flex justify-between items-center mb-6">
                                 <h2 className="text-xl font-bold text-white uppercase italic">Journal des Épargnes</h2>
-                                <button onClick={() => { setEditingSaving(null); setShowSavingModal(true); }} className="btn-primary btn-sm rounded-lg p-2"><Plus size={20} /></button>
+                                <button onClick={() => { setEditingSaving(null); setShowSavingModal(true); }} className="btn btn-primary py-2 px-2 shadow-lg flex items-center justify-center cursor-pointer" title="Ajouter une épargne"><Plus size={16} /></button>
                             </div>
                             <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
                                 {savings.map(s => (
@@ -194,7 +196,12 @@ export default function Finance() {
                                         <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" vertical={false} />
                                         <XAxis dataKey="name" stroke="#64748b" fontSize={10} />
                                         <YAxis stroke="#64748b" fontSize={10} />
-                                        <Tooltip contentStyle={{backgroundColor: '#0F111A', border: '1px solid #ffffff10', borderRadius: '8px'}} />
+                                        <Tooltip contentStyle={{
+                                            backgroundColor: theme === 'dark' ? '#0F111A' : '#FFFFFF',
+                                            border: theme === 'dark' ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid rgba(15, 23, 42, 0.15)',
+                                            borderRadius: '8px',
+                                            color: theme === 'dark' ? '#F8FAFC' : '#0F172A'
+                                        }} />
                                         <Line type="monotone" dataKey="montant" stroke="var(--valorant-cyan)" strokeWidth={3} dot={{fill: 'var(--valorant-cyan)', r: 4}} />
                                     </LineChart>
                                 </ResponsiveContainer>
@@ -209,7 +216,7 @@ export default function Finance() {
                     <div className="glass-card">
                         <div className="flex justify-between items-center mb-6">
                             <h2 className="text-xl font-bold text-white uppercase italic">Prêts en Cours</h2>
-                            <button onClick={() => { setEditingLoan(null); setShowLoanModal(true); }} className="btn-primary btn-sm rounded-lg p-2"><Plus size={20} /></button>
+                            <button onClick={() => { setEditingLoan(null); setShowLoanModal(true); }} className="btn btn-primary py-2 px-2 shadow-lg flex items-center justify-center cursor-pointer" title="Créer un prêt"><Plus size={16} /></button>
                         </div>
                         <div className="space-y-4">
                             {loans.map(l => (
@@ -291,8 +298,8 @@ export default function Finance() {
                             </select>
                         </div>
                         <div className="flex gap-4 mt-8">
-                            <button type="button" onClick={() => setShowLoanModal(false)} className="flex-1 text-slate-400 font-bold uppercase text-xs">Annuler</button>
-                            <button type="submit" className="btn-primary flex-1">Enregistrer</button>
+                            <button type="button" onClick={() => setShowLoanModal(false)} className="flex-1 text-slate-400 font-bold uppercase text-xs hover:text-white transition-colors cursor-pointer">Annuler</button>
+                            <button type="submit" className="btn btn-primary flex-1">Enregistrer</button>
                         </div>
                     </form>
                 </div>
@@ -315,8 +322,8 @@ export default function Finance() {
                             </select>
                         </div>
                         <div className="flex gap-4 mt-8">
-                            <button type="button" onClick={() => setShowSavingModal(false)} className="flex-1 text-slate-400 font-bold uppercase text-xs">Annuler</button>
-                            <button type="submit" className="btn-secondary flex-1">Enregistrer</button>
+                            <button type="button" onClick={() => setShowSavingModal(false)} className="flex-1 text-slate-400 font-bold uppercase text-xs hover:text-white transition-colors cursor-pointer">Annuler</button>
+                            <button type="submit" className="btn btn-secondary flex-1">Enregistrer</button>
                         </div>
                     </form>
                 </div>
