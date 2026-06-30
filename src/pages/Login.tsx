@@ -13,14 +13,14 @@ const features = [
         title: "DASHBOARD ANALYTIQUE",
         desc: "Visualisez l'évolution de vos finances avec des outils de monitoring avancés.",
         icon: <TrendingUp className="text-[var(--valorant-cyan)]" size={32} />,
-        image: "/mockups/finance.png"
+        image: "mockups/finance.png"
     },
     {
         id: 2,
         title: "FLUX SOCIAL RÉACTIF",
         desc: "Ne manquez aucune opportunité grâce au fil d'actions en temps réel.",
         icon: <Shield className="text-[var(--valorant-red)]" size={32} />,
-        image: "/mockups/social.png"
+        image: "mockups/social.png"
     }
 ];
 
@@ -104,7 +104,7 @@ export default function Login() {
                             
                             <div className="relative bg-[#0F111A] border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
                                 <img 
-                                    src={features[currentFeature].image} 
+                                    src={`${import.meta.env.BASE_URL}${features[currentFeature].image}`} 
                                     alt={features[currentFeature].title}
                                     className="w-full h-auto aspect-video object-cover opacity-80"
                                 />

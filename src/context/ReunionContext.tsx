@@ -38,6 +38,7 @@ export function ReunionProvider({ children }: { children: ReactNode }) {
     const fetchReunionDetails = async () => {
         if (!user || !reunionId) return;
         try {
+            // First try fetching with all parameters (advanced schema)
             const { data, error } = await supabase
                 .from('membres_reunion')
                 .select(`
@@ -49,13 +50,33 @@ export function ReunionProvider({ children }: { children: ReactNode }) {
                 .eq('id_profile', user.id)
                 .single();
 
-            if (error || !data) {
-                throw new Error("Reunion not found or unauthorized");
-            }
+            if (error) {
+                console.warn("Table update not found, falling back to basic query...", error);
+                
+                // Fallback to basic query if columns do not exist yet
+                const { data: fallbackData, error: fallbackError } = await supabase
+                    .from('membres_reunion')
+                    .select(`
+                        reunions ( id, nom, description, is_premium ),
+                        role,
+                        poste
+                    `)
+                    .eq('id_reunion', reunionId)
+                    .eq('id_profile', user.id)
+                    .single();
 
-            setReunion(data.reunions as unknown as Reunion);
-            setUserRole(data.role);
-            setUserPoste(data.poste);
+                if (fallbackError || !fallbackData) {
+                    throw fallbackError || new Error("Reunion not found or unauthorized");
+                }
+
+                setReunion(fallbackData.reunions as unknown as Reunion);
+                setUserRole(fallbackData.role);
+                setUserPoste(fallbackData.poste);
+            } else if (data) {
+                setReunion(data.reunions as unknown as Reunion);
+                setUserRole(data.role);
+                setUserPoste(data.poste);
+            }
         } catch (err) {
             console.error("Error fetching reunion:", err);
             navigate('/'); // Redirect to global dashboard if unauthorized
