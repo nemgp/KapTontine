@@ -9,6 +9,10 @@ interface Reunion {
     nom: string;
     description: string;
     is_premium: boolean;
+    meet_link?: string;
+    date_prochaine_reunion?: string;
+    heure_prochaine_reunion?: string;
+    montant_cotisation?: number;
 }
 
 interface ReunionContextType {
@@ -16,6 +20,7 @@ interface ReunionContextType {
     userRole: string | null;
     userPoste: string | null;
     isLoading: boolean;
+    refreshReunion: () => Promise<void>;
 }
 
 const ReunionContext = createContext<ReunionContextType | undefined>(undefined);
@@ -30,40 +35,43 @@ export function ReunionProvider({ children }: { children: ReactNode }) {
     const [userPoste, setUserPoste] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
+    const fetchReunionDetails = async () => {
+        if (!user || !reunionId) return;
+        try {
+            const { data, error } = await supabase
+                .from('membres_reunion')
+                .select(`
+                    reunions ( id, nom, description, is_premium, meet_link, date_prochaine_reunion, heure_prochaine_reunion, montant_cotisation ),
+                    role,
+                    poste
+                `)
+                .eq('id_reunion', reunionId)
+                .eq('id_profile', user.id)
+                .single();
+
+            if (error || !data) {
+                throw new Error("Reunion not found or unauthorized");
+            }
+
+            setReunion(data.reunions as unknown as Reunion);
+            setUserRole(data.role);
+            setUserPoste(data.poste);
+        } catch (err) {
+            console.error("Error fetching reunion:", err);
+            navigate('/'); // Redirect to global dashboard if unauthorized
+        }
+    };
+
     useEffect(() => {
         if (!user || !reunionId) return;
 
-        const fetchReunionDetails = async () => {
+        const initialFetch = async () => {
             setIsLoading(true);
-            try {
-                // Get reunion details AND user's role in this reunion
-                const { data, error } = await supabase
-                    .from('membres_reunion')
-                    .select(`
-                        reunions ( id, nom, description, is_premium ),
-                        role,
-                        poste
-                    `)
-                    .eq('id_reunion', reunionId)
-                    .eq('id_profile', user.id)
-                    .single();
-
-                if (error || !data) {
-                    throw new Error("Reunion not found or unauthorized");
-                }
-
-                setReunion(data.reunions as unknown as Reunion);
-                setUserRole(data.role);
-                setUserPoste(data.poste);
-            } catch (err) {
-                console.error("Error fetching reunion:", err);
-                navigate('/'); // Redirect to global dashboard if unauthorized
-            } finally {
-                setIsLoading(false);
-            }
+            await fetchReunionDetails();
+            setIsLoading(false);
         };
 
-        fetchReunionDetails();
+        initialFetch();
     }, [reunionId, user, navigate]);
 
     if (isLoading) {
@@ -75,7 +83,7 @@ export function ReunionProvider({ children }: { children: ReactNode }) {
     }
 
     return (
-        <ReunionContext.Provider value={{ reunion, userRole, userPoste, isLoading }}>
+        <ReunionContext.Provider value={{ reunion, userRole, userPoste, isLoading, refreshReunion: fetchReunionDetails }}>
             {children}
         </ReunionContext.Provider>
     );

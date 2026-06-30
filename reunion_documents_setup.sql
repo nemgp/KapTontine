@@ -1,8 +1,33 @@
 -- ============================================================
--- SQL Script for Reunion Documents Table
+-- KAPTONTINE — Script SQL de Configuration Avancée
 -- Execute this script in your Supabase SQL Editor
 -- ============================================================
 
+-- 1. MODIFICATIONS SUR LA TABLE REUNIONS (PARAMÈTRES ÉDITABLES)
+-- ============================================================
+alter table public.reunions 
+add column if not exists meet_link text,
+add column if not exists date_prochaine_reunion text,
+add column if not exists heure_prochaine_reunion text default '14:00',
+add column if not exists montant_cotisation integer default 7000;
+
+-- Mise à jour de la politique d'update pour autoriser les admins à modifier la réunion
+drop policy if exists "Créateur peut modifier sa réunion" on public.reunions;
+drop policy if exists "Admins peuvent modifier la réunion" on public.reunions;
+create policy "Admins peuvent modifier la réunion"
+  on public.reunions for update
+  using (
+    id_createur = auth.uid()
+    or exists (
+      select 1 from public.membres_reunion
+      where membres_reunion.id_reunion = reunions.id
+      and membres_reunion.id_profile = auth.uid()
+      and membres_reunion.role = 'admin'
+    )
+  );
+
+-- 2. CRÉATION DE LA TABLE POUR LES LIENS DE DOCUMENTS
+-- ============================================================
 create table if not exists public.reunion_documents (
     id uuid default uuid_generate_v4() primary key,
     id_reunion uuid references public.reunions(id) on delete cascade not null,

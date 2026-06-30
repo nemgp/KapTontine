@@ -4,7 +4,7 @@ import { useReunion } from '../context/ReunionContext';
 import { supabase } from '../lib/supabase';
 import { getSavannaAnimal } from '../lib/savanna';
 
-// Utilitaires Dates
+// Utilitaires Dates par défaut
 function getFirstSunday(year: number, month: number) {
     const date = new Date(year, month, 1);
     while (date.getDay() !== 0) { 
@@ -29,20 +29,35 @@ function getNextMeetingDate() {
 }
 
 export default function ReunionDashboard() {
-    const { reunion } = useReunion();
+    const { reunion, userRole, refreshReunion } = useReunion();
     const [members, setMembers] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    
-    const nextMeeting = getNextMeetingDate();
-    const nextMeetingStr = nextMeeting.toLocaleDateString('fr-FR', { weekday: 'short', day: '2-digit', month: 'short' });
+    const [totalTontine, setTotalTontine] = useState(0);
+
+    // Modal Edit states
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [editMeetLink, setEditMeetLink] = useState('');
+    const [editDate, setEditDate] = useState('');
+    const [editTime, setEditTime] = useState('14:00');
+    const [editMontant, setEditMontant] = useState(7000);
+    const [isSaving, setIsSaving] = useState(false);
+
+    const isAdmin = userRole === 'admin';
+
+    // Date / Heure par défaut si non configurées
+    const nextMeetingDefault = getNextMeetingDate();
+    const nextMeetingDefaultStr = nextMeetingDefault.toLocaleDateString('fr-FR', { weekday: 'short', day: '2-digit', month: 'short' });
+
+    const displayedMeetingDate = reunion?.date_prochaine_reunion || nextMeetingDefaultStr;
+    const displayedMeetingTime = reunion?.heure_prochaine_reunion || '14:00';
+    const displayedMeetLink = reunion?.meet_link || `https://meet.google.com/lookup/${(reunion?.nom || 'reunion').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')}`;
+    const displayedMontantCotisation = reunion?.montant_cotisation !== undefined ? reunion.montant_cotisation : 7000;
 
     useEffect(() => {
         if (reunion?.id) {
             fetchMembers();
         }
     }, [reunion?.id]);
-
-    const [totalTontine, setTotalTontine] = useState(0);
 
     const fetchMembers = async () => {
         setIsLoading(true);
@@ -84,7 +99,33 @@ export default function ReunionDashboard() {
         }
     };
 
-    // Génération du planning dynamique basé sur les membres réels
+    const handleSaveParams = async () => {
+        if (!reunion?.id) return;
+        setIsSaving(true);
+        try {
+            const { error } = await supabase
+                .from('reunions')
+                .update({
+                    meet_link: editMeetLink || null,
+                    date_prochaine_reunion: editDate || null,
+                    heure_prochaine_reunion: editTime || null,
+                    montant_cotisation: editMontant
+                })
+                .eq('id', reunion.id);
+
+            if (error) throw error;
+            
+            await refreshReunion();
+            setIsEditModalOpen(false);
+        } catch (err: any) {
+            console.error("Error updating reunion parameters:", err);
+            alert("Erreur lors de la mise à jour des paramètres. Assurez-vous d'avoir exécuté le script SQL pour ajouter les colonnes meet_link, date_prochaine_reunion, heure_prochaine_reunion et montant_cotisation à la table reunions : " + (err.message || JSON.stringify(err)));
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    // Génération du planning dynamique basé sur les membres réels et la date
     const START_MONTH = 1; // Février
     const START_YEAR = 2026;
     
@@ -93,7 +134,7 @@ export default function ReunionDashboard() {
         const startDate = new Date(START_YEAR, START_MONTH + offsetMonths, 1);
         const endDate = new Date(START_YEAR, START_MONTH + offsetMonths + 2, 1);
         
-        const currentAbsoluteMonth = nextMeeting.getFullYear() * 12 + nextMeeting.getMonth();
+        const currentAbsoluteMonth = nextMeetingDefault.getFullYear() * 12 + nextMeetingDefault.getMonth();
         const startAbsoluteMonth = startDate.getFullYear() * 12 + startDate.getMonth();
         const endAbsoluteMonth = endDate.getFullYear() * 12 + endDate.getMonth();
 
@@ -102,12 +143,12 @@ export default function ReunionDashboard() {
 
         if (currentAbsoluteMonth > endAbsoluteMonth) {
             status = 'past';
-            amount = 7000;
+            amount = displayedMontantCotisation;
         } else if (currentAbsoluteMonth >= startAbsoluteMonth && currentAbsoluteMonth <= endAbsoluteMonth) {
             status = 'current';
             const monthIndexInBlock = currentAbsoluteMonth - startAbsoluteMonth;
-            amount = Math.floor((7000 / 3) * (monthIndexInBlock + 1));
-            if (monthIndexInBlock === 2) amount = 7000;
+            amount = Math.floor((displayedMontantCotisation / 3) * (monthIndexInBlock + 1));
+            if (monthIndexInBlock === 2) amount = displayedMontantCotisation;
         }
 
         return {
@@ -120,6 +161,10 @@ export default function ReunionDashboard() {
         };
     });
 
+    // Calcul du pourcentage dynamique de la tontine
+    const targetAmount = displayedMontantCotisation * members.length;
+    const collectionPercentage = targetAmount > 0 ? Math.min(100, Math.round((totalTontine / targetAmount) * 100)) : 0;
+
     if (isLoading) {
         return (
             <div className="flex justify-center items-center py-20">
@@ -130,23 +175,39 @@ export default function ReunionDashboard() {
 
     return (
         <div className="pb-10">
-            <header className="mb-8">
-                <h1 className="text-4xl font-black text-white uppercase tracking-tighter italic">Tableau de Bord</h1>
-                <p className="text-slate-400 mt-2 flex items-center gap-2">
-                    <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                    Session Active : {reunion?.nom}
-                </p>
+            <header className="mb-8 flex justify-between items-start">
+                <div>
+                    <h1 className="text-4xl font-black text-white uppercase tracking-tighter italic">Tableau de Bord</h1>
+                    <p className="text-slate-400 mt-2 flex items-center gap-2">
+                        <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                        Session Active : {reunion?.nom}
+                    </p>
+                </div>
+                {isAdmin && (
+                    <button
+                        onClick={() => {
+                            setEditMeetLink(reunion?.meet_link || '');
+                            setEditDate(reunion?.date_prochaine_reunion || '');
+                            setEditTime(reunion?.heure_prochaine_reunion || '14:00');
+                            setEditMontant(reunion?.montant_cotisation !== undefined ? reunion.montant_cotisation : 7000);
+                            setIsEditModalOpen(true);
+                        }}
+                        className="btn btn-outline py-2 px-4 text-xs font-bold uppercase tracking-wider flex items-center gap-2 border-purple-500/30 text-purple-300 hover:bg-purple-500/10 cursor-pointer"
+                    >
+                        ⚙️ Paramètres Réunion
+                    </button>
+                )}
             </header>
 
             {/* Indicateurs Clés - Style Valorant */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
                 <div className="glass-card bg-gradient-to-br from-white/5 to-transparent border-l-4 border-l-[var(--valorant-cyan)]">
                     <h2 className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-1">Prochaine Réunion</h2>
-                    <p className="text-3xl font-black text-[var(--text-color)] uppercase italic">{nextMeetingStr}</p>
+                    <p className="text-3xl font-black text-[var(--text-color)] uppercase italic">{displayedMeetingDate}</p>
                     <div className="mt-4 flex items-center justify-between">
-                        <span className="text-xs text-accent-cyan flex items-center gap-1 font-bold"><Clock size={14} /> 14:00</span>
+                        <span className="text-xs text-accent-cyan flex items-center gap-1 font-bold"><Clock size={14} /> {displayedMeetingTime}</span>
                         <a 
-                            href={`https://meet.google.com/lookup/${(reunion?.nom || 'reunion').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')}`}
+                            href={displayedMeetLink}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-[10px] text-slate-400 hover:text-[var(--valorant-cyan)] flex items-center gap-1 uppercase font-bold tracking-widest transition-colors"
@@ -157,14 +218,18 @@ export default function ReunionDashboard() {
                 </div>
 
                 <div className="glass-card border-l-4 border-l-[var(--valorant-red)]">
-                    <h2 className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-1">Cagnotte Réunion</h2>
+                    <h2 className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-1">Montant Cotisation</h2>
                     <div className="flex items-baseline gap-2">
-                        <span className="text-3xl font-black text-[var(--text-color)] italic">{totalTontine} €</span>
-                        <span className="text-[10px] text-slate-500 font-bold">Collectés</span>
+                        <span className="text-3xl font-black text-[var(--text-color)] italic">{displayedMontantCotisation.toLocaleString('fr-FR')} €</span>
+                        <span className="text-[10px] text-slate-500 font-bold">/ membre</span>
                     </div>
-                    <div className="mt-4">
+                    <div className="mt-4 flex flex-col gap-1">
                         <div className="progress-container">
-                            <div className="progress-bar w-[100%]"></div>
+                            <div className="progress-bar" style={{ width: `${collectionPercentage}%` }}></div>
+                        </div>
+                        <div className="flex justify-between items-center text-[9px] font-bold text-slate-500 mt-1 uppercase tracking-wider">
+                            <span>Collecté : {totalTontine.toLocaleString('fr-FR')} €</span>
+                            <span>Cible : {targetAmount.toLocaleString('fr-FR')} € ({collectionPercentage}%)</span>
                         </div>
                     </div>
                 </div>
@@ -248,7 +313,7 @@ export default function ReunionDashboard() {
                             <div className={`p-3 rounded-lg flex items-center justify-between border ${item.status === 'current' ? 'bg-white/5 border-white/10' : 'bg-black/20 border-white/5'}`}>
                                 <div className="flex items-center gap-2">
                                     <Banknote size={16} className={item.status === 'past' ? 'text-green-400' : 'text-slate-500'} />
-                                    <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Cagnotte</span>
+                                    <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Tontine</span>
                                 </div>
                                 <span className={`text-sm font-black ${item.status === 'past' ? 'text-green-400' : 'text-white'}`}>
                                     {item.amount} €
@@ -265,6 +330,86 @@ export default function ReunionDashboard() {
                     </div>
                 ))}
             </div>
+
+            {/* Modal de Modification des Paramètres (Admins uniquement) */}
+            {isEditModalOpen && (
+                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                    <div className="glass-card w-full max-w-md border border-purple-500/30 p-8 text-left">
+                        <h2 className="text-xl font-bold text-[var(--text-color)] mb-6 uppercase italic tracking-wider">Paramètres de la Réunion</h2>
+                        
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Lien Google Meet</label>
+                                <input
+                                    type="url"
+                                    value={editMeetLink}
+                                    onChange={(e) => setEditMeetLink(e.target.value)}
+                                    placeholder="https://meet.google.com/..."
+                                    className="w-full p-3 bg-slate-900 border border-white/10 rounded-lg text-sm text-white focus:outline-none focus:border-purple-500"
+                                />
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Date Prochaine Réunion</label>
+                                    <input
+                                        type="text"
+                                        value={editDate}
+                                        onChange={(e) => setEditDate(e.target.value)}
+                                        placeholder="ex: Dim. 05 Juil."
+                                        className="w-full p-3 bg-slate-900 border border-white/10 rounded-lg text-sm text-white focus:outline-none focus:border-purple-500"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Heure</label>
+                                    <input
+                                        type="text"
+                                        value={editTime}
+                                        onChange={(e) => setEditTime(e.target.value)}
+                                        placeholder="ex: 14:00"
+                                        className="w-full p-3 bg-slate-900 border border-white/10 rounded-lg text-sm text-white focus:outline-none focus:border-purple-500"
+                                    />
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Montant de la Cotisation (€)</label>
+                                <input
+                                    type="number"
+                                    value={editMontant}
+                                    onChange={(e) => setEditMontant(Number(e.target.value))}
+                                    placeholder="7000"
+                                    className="w-full p-3 bg-slate-900 border border-white/10 rounded-lg text-sm text-white focus:outline-none focus:border-purple-500"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="flex gap-3 justify-end mt-8">
+                            <button
+                                onClick={() => setIsEditModalOpen(false)}
+                                className="px-4 py-2 text-[var(--text-muted)] hover:bg-[rgba(255,255,255,0.05)] rounded-lg transition-colors cursor-pointer text-sm"
+                                disabled={isSaving}
+                            >
+                                Annuler
+                            </button>
+                            <button
+                                onClick={handleSaveParams}
+                                className="btn btn-primary shadow-lg flex items-center gap-2 cursor-pointer text-sm font-bold text-white"
+                                disabled={isSaving}
+                            >
+                                {isSaving ? (
+                                    <>
+                                        <Loader2 className="animate-spin" size={16} />
+                                        Enregistrement...
+                                    </>
+                                ) : (
+                                    "Enregistrer"
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
