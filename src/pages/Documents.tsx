@@ -97,9 +97,9 @@ export default function Documents() {
             if (dbError) throw dbError;
 
             await fetchDocuments();
-        } catch (err) {
+        } catch (err: any) {
             console.error("Error uploading file:", err);
-            alert("Erreur lors du chargement du fichier. Vérifiez que la table 'reunion_documents' a été créée.");
+            alert("Erreur lors du chargement du fichier : " + (err.message || JSON.stringify(err)));
         } finally {
             setUploading(prev => ({ ...prev, [type]: false }));
         }
@@ -129,9 +129,9 @@ export default function Documents() {
 
             if (error) throw error;
             await fetchDocuments();
-        } catch (err) {
+        } catch (err: any) {
             console.error("Error deleting file:", err);
-            alert("Erreur lors de la suppression du fichier.");
+            alert("Erreur lors de la suppression du fichier : " + (err.message || JSON.stringify(err)));
         }
     };
 
@@ -155,9 +155,9 @@ export default function Documents() {
             if (error) throw error;
             alert("Lien enregistré avec succès !");
             await fetchDocuments();
-        } catch (err) {
+        } catch (err: any) {
             console.error("Error saving link:", err);
-            alert("Erreur lors de l'enregistrement du lien. Vérifiez que la table 'reunion_documents' a été créée.");
+            alert("Erreur lors de l'enregistrement du lien : " + (err.message || JSON.stringify(err)));
         }
     };
 
