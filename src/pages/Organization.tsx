@@ -498,8 +498,18 @@ export default function Organization() {
                         <div className="flex flex-col gap-3">
                             <button 
                                 onClick={() => {
-                                    const subject = encodeURIComponent(`Invitation à rejoindre la réunion "${reunion?.nom}" sur KapTontine`);
-                                    const body = encodeURIComponent(`Bonjour,\n\nJe t'invite à rejoindre notre réunion "${reunion?.nom}" sur KapTontine.\n\nInscris-toi sur KapTontine via ce lien pour pouvoir y participer :\n${window.location.origin}${import.meta.env.BASE_URL}login\n\nÀ bientôt !`);
+                                    const subject = encodeURIComponent(`🌟 Invitation à rejoindre la tontine "${reunion?.nom || 'KapTontine'}"`);
+                                    const body = encodeURIComponent(
+                                        `Bonjour,\n\n` +
+                                        `J'ai le plaisir de t'inviter à rejoindre notre réunion de tontine "${reunion?.nom || 'KapTontine'}" sur KapTontine, notre plateforme de gestion simplifiée et sécurisée.\n\n` +
+                                        `Grâce à cet outil, tu pourras :\n` +
+                                        `🔹 Suivre les épargnes et cotisations en temps réel.\n` +
+                                        `🔹 Faire des demandes de prêts ou de soutiens.\n` +
+                                        `🔹 Participer activement au fil de discussion.\n\n` +
+                                        `👉 Pour y participer, crée simplement ton compte via ce lien :\n` +
+                                        `https://nemgp.github.io/KapTontine/login\n\n` +
+                                        `À très bientôt !`
+                                    );
                                     window.open(`mailto:${inviteEmail}?subject=${subject}&body=${body}`);
                                     setShowInviteModal(false);
                                 }}
@@ -510,7 +520,13 @@ export default function Organization() {
                             
                             <button 
                                 onClick={() => {
-                                    const text = encodeURIComponent(`Bonjour, je t'invite à rejoindre notre réunion "${reunion?.nom}" sur KapTontine. Inscris-toi via ce lien :\n${window.location.origin}${import.meta.env.BASE_URL}login`);
+                                    const text = encodeURIComponent(
+                                        `🌟 *Invitation KapTontine* 🌟\n\n` +
+                                        `Bonjour ! Je t'invite à rejoindre notre tontine *"${reunion?.nom || 'KapTontine'}"* sur notre plateforme de gestion sécurisée.\n\n` +
+                                        `👉 Inscris-toi dès maintenant en quelques clics via ce lien :\n` +
+                                        `https://nemgp.github.io/KapTontine/login\n\n` +
+                                        `À très bientôt ! 🚀`
+                                    );
                                     window.open(`https://api.whatsapp.com/send?text=${text}`);
                                     setShowInviteModal(false);
                                 }}
