@@ -76,7 +76,9 @@ export default function Documents() {
                 .from('action-images')
                 .upload(filePath, file, { upsert: true });
 
-            if (uploadError) throw uploadError;
+            if (uploadError) {
+                throw new Error("[Supabase Storage] " + uploadError.message);
+            }
 
             const { data: { publicUrl } } = supabase.storage
                 .from('action-images')
@@ -94,7 +96,9 @@ export default function Documents() {
                     updated_at: new Date().toISOString()
                 }, { onConflict: 'id_reunion,doc_type' });
 
-            if (dbError) throw dbError;
+            if (dbError) {
+                throw new Error("[Base de données] " + dbError.message);
+            }
 
             await fetchDocuments();
         } catch (err: any) {
