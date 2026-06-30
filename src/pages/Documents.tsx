@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
-import { FileText, BookOpen, ChevronDown, ChevronRight, Home, Shield, Lock, Smartphone, Upload, Download, Trash2, Loader2 } from 'lucide-react';
+import { FileText, BookOpen, ChevronDown, ChevronRight, Home, Shield, Lock, Smartphone, Upload, Download, Trash2, Loader2, ExternalLink } from 'lucide-react';
 import { useReunion } from '../context/ReunionContext';
 import { supabase } from '../lib/supabase';
 
 export default function Documents() {
     const { reunion, userRole } = useReunion();
     const [expandedSections, setExpandedSections] = useState<string[]>(['navigation']);
-    const [files, setFiles] = useState<{ [key: string]: { name: string; url: string } }>({});
+    const [documents, setDocuments] = useState<any[]>([]);
+    const [linksInput, setLinksInput] = useState<{ [key: string]: string }>({});
     const [isLoading, setIsLoading] = useState(true);
     const [uploading, setUploading] = useState<{ [key: string]: boolean }>({});
 
@@ -24,41 +25,31 @@ export default function Documents() {
 
     useEffect(() => {
         if (reunion?.id) {
-            fetchFiles();
+            fetchDocuments();
         }
     }, [reunion?.id]);
 
-    const fetchFiles = async () => {
+    const fetchDocuments = async () => {
         if (!reunion?.id) return;
         setIsLoading(true);
         try {
-            const { data, error } = await supabase.storage
-                .from('action-images')
-                .list(reunion.id);
+            const { data, error } = await supabase
+                .from('reunion_documents')
+                .select('*')
+                .eq('id_reunion', reunion.id);
 
             if (error) throw error;
+            setDocuments(data || []);
 
-            const docs: { [key: string]: { name: string; url: string } } = {};
+            const inputs: { [key: string]: string } = {};
             if (data) {
-                const docTypes = ['doc_cycle', 'doc_finance', 'doc_epargne'];
-                for (const file of data) {
-                    for (const type of docTypes) {
-                        if (file.name.startsWith(type + '.')) {
-                            const { data: { publicUrl } } = supabase.storage
-                                .from('action-images')
-                                .getPublicUrl(`${reunion.id}/${file.name}`);
-                            
-                            docs[type] = {
-                                name: file.name,
-                                url: publicUrl
-                            };
-                        }
-                    }
-                }
+                data.forEach(doc => {
+                    inputs[doc.doc_type] = doc.link_url || '';
+                });
             }
-            setFiles(docs);
+            setLinksInput(inputs);
         } catch (err) {
-            console.error("Error listing documents:", err);
+            console.error("Error fetching documents:", err);
         } finally {
             setIsLoading(false);
         }
@@ -69,16 +60,16 @@ export default function Documents() {
         setUploading(prev => ({ ...prev, [type]: true }));
 
         try {
-            // Delete existing file of this type first if any
-            const existingFile = files[type];
-            if (existingFile) {
+            // Delete old file from storage if any
+            const existingDoc = documents.find(d => d.doc_type === type);
+            if (existingDoc?.file_name) {
                 await supabase.storage
                     .from('action-images')
-                    .remove([`${reunion.id}/${existingFile.name}`]);
+                    .remove([`${reunion.id}/${existingDoc.file_name}`]);
             }
 
             const fileExt = file.name.split('.').pop();
-            const fileName = `${type}.${fileExt}`;
+            const fileName = `${type}-${Math.random().toString(36).substring(7)}.${fileExt}`;
             const filePath = `${reunion.id}/${fileName}`;
 
             const { error: uploadError } = await supabase.storage
@@ -87,34 +78,98 @@ export default function Documents() {
 
             if (uploadError) throw uploadError;
 
-            await fetchFiles();
+            const { data: { publicUrl } } = supabase.storage
+                .from('action-images')
+                .getPublicUrl(filePath);
+
+            // Upsert into reunion_documents table
+            const { error: dbError } = await supabase
+                .from('reunion_documents')
+                .upsert({
+                    id_reunion: reunion.id,
+                    doc_type: type,
+                    file_url: publicUrl,
+                    file_name: fileName,
+                    link_url: existingDoc?.link_url || null,
+                    updated_at: new Date().toISOString()
+                }, { onConflict: 'id_reunion,doc_type' });
+
+            if (dbError) throw dbError;
+
+            await fetchDocuments();
         } catch (err) {
             console.error("Error uploading file:", err);
-            alert("Erreur lors du chargement du fichier.");
+            alert("Erreur lors du chargement du fichier. Vérifiez que la table 'reunion_documents' a été créée.");
         } finally {
             setUploading(prev => ({ ...prev, [type]: false }));
         }
     };
 
-    const handleDelete = async (type: string) => {
-        if (!reunion?.id || !window.confirm("Voulez-vous vraiment supprimer ce document ?")) return;
-        
+    const handleDeleteFile = async (type: string) => {
+        if (!reunion?.id || !window.confirm("Voulez-vous vraiment supprimer ce fichier ?")) return;
+
         try {
-            const existingFile = files[type];
-            if (existingFile) {
-                const { error } = await supabase.storage
+            const existingDoc = documents.find(d => d.doc_type === type);
+            if (existingDoc?.file_name) {
+                await supabase.storage
                     .from('action-images')
-                    .remove([`${reunion.id}/${existingFile.name}`]);
-                if (error) throw error;
+                    .remove([`${reunion.id}/${existingDoc.file_name}`]);
             }
-            await fetchFiles();
+
+            const { error } = await supabase
+                .from('reunion_documents')
+                .upsert({
+                    id_reunion: reunion.id,
+                    doc_type: type,
+                    file_url: null,
+                    file_name: null,
+                    link_url: existingDoc?.link_url || null,
+                    updated_at: new Date().toISOString()
+                }, { onConflict: 'id_reunion,doc_type' });
+
+            if (error) throw error;
+            await fetchDocuments();
         } catch (err) {
             console.error("Error deleting file:", err);
             alert("Erreur lors de la suppression du fichier.");
         }
     };
 
+    const handleSaveLink = async (type: string) => {
+        if (!reunion?.id) return;
+        const linkUrl = linksInput[type] || '';
+        
+        try {
+            const existingDoc = documents.find(d => d.doc_type === type);
+            const { error } = await supabase
+                .from('reunion_documents')
+                .upsert({
+                    id_reunion: reunion.id,
+                    doc_type: type,
+                    link_url: linkUrl || null,
+                    file_url: existingDoc?.file_url || null,
+                    file_name: existingDoc?.file_name || null,
+                    updated_at: new Date().toISOString()
+                }, { onConflict: 'id_reunion,doc_type' });
+
+            if (error) throw error;
+            alert("Lien enregistré avec succès !");
+            await fetchDocuments();
+        } catch (err) {
+            console.error("Error saving link:", err);
+            alert("Erreur lors de l'enregistrement du lien. Vérifiez que la table 'reunion_documents' a été créée.");
+        }
+    };
+
     const documentCards = [
+        {
+            id: 'doc_ag',
+            label: "Comptes rendus d'AG",
+            description: "Procès-verbaux et rapports d'assemblée générale",
+            colorClass: 'border-l-amber-500 hover:border-amber-400',
+            bgIconClass: 'bg-amber-500/20',
+            iconColorClass: 'text-amber-300'
+        },
         {
             id: 'doc_cycle',
             label: 'Cycle en cours',
@@ -145,32 +200,35 @@ export default function Documents() {
         <div className="pb-10">
             <h1 className="text-4xl font-black text-[var(--text-color)] uppercase italic tracking-tighter mb-8 font-sans">Documents & Archives</h1>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
                 {documentCards.map((card) => {
-                    const fileObj = files[card.id];
+                    const docObj = documents.find(d => d.doc_type === card.id);
                     const isFileUploading = uploading[card.id];
+                    const hasFile = !!docObj?.file_url;
+                    const hasLink = !!docObj?.link_url;
 
                     return (
                         <div
                             key={card.id}
-                            className={`glass-card flex flex-col items-center text-center p-8 border-l-4 ${card.colorClass}`}
+                            className={`glass-card flex flex-col items-center text-center p-6 border-l-4 ${card.colorClass}`}
                         >
                             <div className={`w-16 h-16 rounded-2xl ${card.bgIconClass} flex items-center justify-center mb-4 shadow-lg transition-all`}>
                                 <FileText size={32} className={card.iconColorClass} />
                             </div>
-                            <h2 className="text-xl font-bold text-[var(--text-color)] mb-2 uppercase italic tracking-wider font-sans">{card.label}</h2>
-                            <p className="text-xs text-[var(--text-muted)] mb-6">{card.description}</p>
+                            <h2 className="text-lg font-bold text-[var(--text-color)] mb-2 uppercase italic tracking-wider font-sans leading-tight min-h-[44px] flex items-center justify-center">{card.label}</h2>
+                            <p className="text-xs text-[var(--text-muted)] mb-6 min-h-[32px]">{card.description}</p>
 
                             {isLoading ? (
                                 <div className="flex justify-center items-center py-2 h-10">
                                     <Loader2 className="animate-spin text-slate-500" size={20} />
                                 </div>
                             ) : (
-                                <div className="w-full flex flex-col items-center gap-4 mt-auto">
-                                    {fileObj ? (
+                                <div className="w-full flex flex-col items-center gap-3 mt-auto">
+                                    {/* Action Buttons */}
+                                    {hasFile && (
                                         <div className="w-full flex flex-col items-center">
                                             <a
-                                                href={fileObj.url}
+                                                href={docObj.file_url}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 className="btn btn-secondary py-2 px-4 shadow-md flex items-center gap-2 text-xs cursor-pointer w-full justify-center"
@@ -178,46 +236,82 @@ export default function Documents() {
                                                 <Download size={14} />
                                                 Télécharger le fichier
                                             </a>
-                                            <span className="text-[10px] text-[var(--text-muted)] truncate max-w-[200px] mt-2 block" title={fileObj.name}>
-                                                {fileObj.name.substring(card.id.length + 1)}
+                                            <span className="text-[9px] text-[var(--text-muted)] truncate max-w-[180px] mt-1 block" title={docObj.file_name}>
+                                                {docObj.file_name.split('-').slice(1).join('-')}
                                             </span>
                                         </div>
-                                    ) : (
+                                    )}
+
+                                    {hasLink && (
+                                        <a
+                                            href={docObj.link_url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="btn btn-outline py-2 px-4 flex items-center gap-2 text-xs cursor-pointer w-full justify-center border-purple-500/30 text-purple-300 hover:bg-purple-500/10"
+                                        >
+                                            <ExternalLink size={14} />
+                                            Ouvrir le lien externe
+                                        </a>
+                                    )}
+
+                                    {!hasFile && !hasLink && (
                                         <span className="text-xs text-red-400 font-bold uppercase tracking-widest block py-2">
                                             Aucun document
                                         </span>
                                     )}
 
+                                    {/* Admin Controls */}
                                     {isAdmin && (
-                                        <div className="flex gap-2 w-full mt-2 border-t border-white/10 pt-4 justify-center">
-                                            {isFileUploading ? (
-                                                <Loader2 className="animate-spin text-purple-500" size={20} />
-                                            ) : (
-                                                <>
-                                                    <label className="btn btn-outline py-2 px-3 text-xs flex items-center gap-1.5 cursor-pointer flex-1 justify-center border-purple-500/30 text-[var(--text-color)] hover:bg-purple-500/10">
-                                                        <Upload size={13} />
-                                                        {fileObj ? 'Remplacer' : 'Charger'}
-                                                        <input
-                                                            type="file"
-                                                            className="hidden"
-                                                            onChange={(e) => {
-                                                                if (e.target.files && e.target.files[0]) {
-                                                                    handleUpload(card.id, e.target.files[0]);
-                                                                }
-                                                            }}
-                                                        />
-                                                    </label>
-                                                    {fileObj && (
-                                                        <button
-                                                            onClick={() => handleDelete(card.id)}
-                                                            className="p-2 border border-red-500/30 text-red-400 hover:bg-red-500/10 rounded-[4px] cursor-pointer"
-                                                            title="Supprimer"
-                                                        >
-                                                            <Trash2 size={14} />
-                                                        </button>
-                                                    )}
-                                                </>
-                                            )}
+                                        <div className="w-full flex flex-col gap-3 mt-2 border-t border-white/10 pt-4">
+                                            {/* File Upload / Delete */}
+                                            <div className="flex gap-2 justify-center items-center">
+                                                {isFileUploading ? (
+                                                    <Loader2 className="animate-spin text-purple-500" size={20} />
+                                                ) : (
+                                                    <>
+                                                        <label className="btn btn-outline py-1.5 px-2 text-[10px] flex items-center gap-1 cursor-pointer flex-1 justify-center border-white/10 text-[var(--text-color)] hover:bg-white/5">
+                                                            <Upload size={12} />
+                                                            {hasFile ? 'Remplacer Fichier' : 'Charger Fichier'}
+                                                            <input
+                                                                type="file"
+                                                                className="hidden"
+                                                                onChange={(e) => {
+                                                                    if (e.target.files && e.target.files[0]) {
+                                                                        handleUpload(card.id, e.target.files[0]);
+                                                                    }
+                                                                }}
+                                                            />
+                                                        </label>
+                                                        {hasFile && (
+                                                            <button
+                                                                onClick={() => handleDeleteFile(card.id)}
+                                                                className="p-1.5 border border-red-500/30 text-red-400 hover:bg-red-500/10 rounded-[4px] cursor-pointer"
+                                                                title="Supprimer le fichier"
+                                                            >
+                                                                <Trash2 size={12} />
+                                                            </button>
+                                                        )}
+                                                    </>
+                                                )}
+                                            </div>
+
+                                            {/* Link input */}
+                                            <div className="flex gap-1.5 mt-1">
+                                                <input
+                                                    type="url"
+                                                    placeholder="URL du lien externe (ex: Drive)"
+                                                    value={linksInput[card.id] || ''}
+                                                    onChange={(e) => setLinksInput(prev => ({ ...prev, [card.id]: e.target.value }))}
+                                                    className="flex-1 p-2 bg-slate-900 border border-white/10 rounded text-[9px] text-white outline-none focus:ring-1 focus:ring-purple-500"
+                                                />
+                                                <button
+                                                    onClick={() => handleSaveLink(card.id)}
+                                                    className="px-2 py-1.5 bg-purple-600 hover:bg-purple-500 text-white rounded text-[9px] font-bold cursor-pointer transition-colors"
+                                                    title="Enregistrer le lien"
+                                                >
+                                                    Enregistrer
+                                                </button>
+                                            </div>
                                         </div>
                                     )}
                                 </div>
