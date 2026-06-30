@@ -49,11 +49,28 @@ export default function Login() {
 
         try {
             if (isSignUp) {
-                const { error: signUpError } = await supabase.auth.signUp({
+                const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
                     email,
                     password,
                 });
                 if (signUpError) throw new Error(signUpError.message);
+                
+                // Create the profile record in the profiles table
+                if (signUpData?.user) {
+                    const defaultName = email.split('@')[0];
+                    const { error: profileError } = await supabase
+                        .from('profiles')
+                        .insert({
+                            id: signUpData.user.id,
+                            email: email,
+                            nom: defaultName,
+                        });
+                    // Don't throw on profile error — user is still created
+                    if (profileError) {
+                        console.warn('Profile creation warning:', profileError);
+                    }
+                }
+                
                 await login(email, password);
             } else {
                 await login(email, password);

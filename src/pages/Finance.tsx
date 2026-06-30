@@ -144,7 +144,7 @@ export default function Finance() {
 
     return (
         <div className="pb-10">
-            <h1 className="text-4xl font-black text-white uppercase italic tracking-tighter mb-8">Finances</h1>
+            <h1 className="text-4xl font-black text-[var(--text-color)] uppercase italic tracking-tighter mb-8">Finances</h1>
 
             {/* Nav Tabs */}
             <div className="flex bg-white/5 p-1 rounded-xl border border-white/10 mb-8 w-fit">
@@ -164,7 +164,7 @@ export default function Finance() {
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                         <div className="glass-card">
                             <div className="flex justify-between items-center mb-6">
-                                <h2 className="text-xl font-bold text-white uppercase italic">Journal des Épargnes</h2>
+                                <h2 className="text-xl font-bold text-[var(--text-color)] uppercase italic">Journal des Épargnes</h2>
                                 <button onClick={() => { setEditingSaving(null); setShowSavingModal(true); }} className="btn btn-primary py-2 px-2 shadow-lg flex items-center justify-center cursor-pointer" title="Ajouter une épargne"><Plus size={16} /></button>
                             </div>
                             <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
@@ -189,7 +189,7 @@ export default function Finance() {
                         </div>
 
                         <div className="glass-card">
-                            <h2 className="text-xl font-bold text-white uppercase italic mb-6">Évolution Épargne</h2>
+                            <h2 className="text-xl font-bold text-[var(--text-color)] uppercase italic mb-6">Évolution Épargne</h2>
                             <div className="h-[300px] w-full">
                                 <ResponsiveContainer width="100%" height="100%">
                                     <LineChart data={savingsEvolution}>
@@ -215,7 +215,7 @@ export default function Finance() {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     <div className="glass-card">
                         <div className="flex justify-between items-center mb-6">
-                            <h2 className="text-xl font-bold text-white uppercase italic">Prêts en Cours</h2>
+                            <h2 className="text-xl font-bold text-[var(--text-color)] uppercase italic">Prêts en Cours</h2>
                             <button onClick={() => { setEditingLoan(null); setShowLoanModal(true); }} className="btn btn-primary py-2 px-2 shadow-lg flex items-center justify-center cursor-pointer" title="Créer un prêt"><Plus size={16} /></button>
                         </div>
                         <div className="space-y-4">
@@ -241,7 +241,7 @@ export default function Finance() {
                     </div>
 
                     <div className="glass-card">
-                        <h2 className="text-xl font-bold text-white uppercase italic mb-6">Simulateur</h2>
+                        <h2 className="text-xl font-bold text-[var(--text-color)] uppercase italic mb-6">Simulateur</h2>
                         <div className="space-y-6">
                             <div>
                                 <label className="text-xs font-bold text-slate-500 uppercase mb-2 block">Montant (€)</label>
@@ -284,7 +284,7 @@ export default function Finance() {
             {showLoanModal && (
                 <div className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-4">
                     <form onSubmit={handleSaveLoan} className="glass-card w-full max-w-md border-[var(--valorant-red)]/30">
-                        <h3 className="text-xl font-black text-white uppercase italic mb-6">{editingLoan ? 'Modifier Prêt' : 'Nouveau Prêt'}</h3>
+                        <h3 className="text-xl font-black text-[var(--text-color)] uppercase italic mb-6">{editingLoan ? 'Modifier Prêt' : 'Nouveau Prêt'}</h3>
                         <div className="space-y-4">
                             <select name="member_name" defaultValue={editingLoan?.member_name} className="w-full p-3 bg-slate-900 rounded-xl border border-white/10 text-white" required>
                                 <option value="">Choisir un membre</option>
@@ -308,7 +308,7 @@ export default function Finance() {
             {showSavingModal && (
                 <div className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-4">
                     <form onSubmit={handleSaveSaving} className="glass-card w-full max-w-md border-[var(--valorant-cyan)]/30">
-                        <h3 className="text-xl font-black text-white uppercase italic mb-6">{editingSaving ? 'Modifier Épargne' : 'Nouvelle Épargne'}</h3>
+                        <h3 className="text-xl font-black text-[var(--text-color)] uppercase italic mb-6">{editingSaving ? 'Modifier Épargne' : 'Nouvelle Épargne'}</h3>
                         <div className="space-y-4">
                             <select name="member_name" defaultValue={editingSaving?.member_name} className="w-full p-3 bg-slate-900 rounded-xl border border-white/10 text-white" required>
                                 <option value="">Choisir un membre</option>

@@ -62,7 +62,7 @@ export default function Profile() {
     };
 
     return (
-        <div className="min-h-screen p-4 md:p-8 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-slate-900 via-[#0F111A] to-black">
+        <div className="min-h-screen p-4 md:p-8" style={{background: 'var(--bg-color)'}}>
             <div className="container mx-auto max-w-5xl pb-10">
                 <header className="mb-8">
                     <button 
@@ -71,11 +71,11 @@ export default function Profile() {
                     >
                         <ArrowLeft size={16} /> Retour
                     </button>
-                    <h1 className="text-3xl font-bold text-white drop-shadow-md flex items-center gap-3">
+                    <h1 className="text-3xl font-bold text-[var(--text-color)] drop-shadow-md flex items-center gap-3">
                         <User className="text-purple-500" size={32} />
                         Mon Profil
                     </h1>
-                    <p className="text-slate-400 mt-2">Gérez vos informations personnelles</p>
+                    <p className="text-[var(--text-muted)] mt-2">Gérez vos informations personnelles</p>
                 </header>
 
             <div className="max-w-xl">
@@ -110,8 +110,8 @@ export default function Profile() {
                                 </label>
                             </div>
                             <div>
-                                <h3 className="text-white font-medium mb-1">Photo de profil</h3>
-                                <p className="text-xs text-slate-400">JPG, PNG. Max 2MB.</p>
+                                <h3 className="text-[var(--text-color)] font-medium mb-1">Photo de profil</h3>
+                                <p className="text-xs text-[var(--text-muted)]">JPG, PNG. Max 2MB.</p>
                             </div>
                         </div>
 
@@ -119,7 +119,7 @@ export default function Profile() {
 
                         {/* Name Input */}
                         <div>
-                            <label className="block text-sm font-medium text-slate-300 mb-2">Nom d'affichage</label>
+                            <label className="block text-sm font-medium text-[var(--text-color)] mb-2">Nom d'affichage</label>
                             <input
                                 type="text"
                                 value={nom}
@@ -132,7 +132,7 @@ export default function Profile() {
 
                         {/* Email (Readonly) */}
                         <div>
-                            <label className="block text-sm font-medium text-slate-300 mb-2">Email de connexion</label>
+                            <label className="block text-sm font-medium text-[var(--text-color)] mb-2">Email de connexion</label>
                             <input
                                 type="email"
                                 value={user?.email || ''}

@@ -217,7 +217,7 @@ export default function Organization() {
     return (
         <div className="pb-10">
             <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
-                <h1 className="text-3xl font-bold text-white drop-shadow-md">Organisation</h1>
+                <h1 className="text-3xl font-bold text-[var(--text-color)] drop-shadow-md">Organisation</h1>
                 
                 <div className="flex bg-white/5 p-1 rounded-xl border border-white/10">
                     <button 
@@ -241,7 +241,7 @@ export default function Organization() {
                     {!reunion?.is_premium ? (
                         <div className="p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl flex flex-col md:flex-row justify-between items-center gap-4">
                             <div>
-                                <h3 className="font-bold text-white flex items-center gap-2">
+                                <h3 className="font-bold text-[var(--text-color)] flex items-center gap-2">
                                     <span className="text-xs bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded uppercase font-black">Gratuit</span>
                                     Réunion limitée à 5 membres maximum ({members.length} / 5)
                                 </h3>
@@ -260,10 +260,10 @@ export default function Organization() {
                         </div>
                     ) : (
                         <div className="p-4 bg-purple-500/10 border border-purple-500/30 rounded-xl">
-                            <h3 className="font-bold text-white flex items-center gap-2">
-                                <span className="text-xs bg-purple-500/20 text-purple-300 border border-purple-500/30 px-2 py-0.5 rounded uppercase font-black">Premium ✦</span>
-                                Réunion Premium — Nombre de membres illimité ({members.length} membres)
-                            </h3>
+                                <h3 className="font-bold text-[var(--text-color)] flex items-center gap-2">
+                                    <span className="text-xs bg-purple-500/20 text-purple-300 border border-purple-500/30 px-2 py-0.5 rounded uppercase font-black">Premium ✦</span>
+                                    Réunion Premium — Nombre de membres illimité ({members.length} membres)
+                                </h3>
                         </div>
                     )}
 
@@ -272,7 +272,7 @@ export default function Organization() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                             {/* Rename Reunion Panel */}
                             <div className="glass-card">
-                                <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                                <h2 className="text-lg font-bold text-[var(--text-color)] mb-4 flex items-center gap-2">
                                     <Edit size={20} className="text-purple-400" />
                                     Paramètres de la réunion
                                 </h2>
@@ -303,10 +303,10 @@ export default function Organization() {
                             {/* Invite Section */}
                             <div className="glass-card border-dashed border-2 border-white/5 hover:border-purple-500/30 transition-all flex flex-col justify-between">
                                 <div>
-                                    <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                                        <UserPlus size={20} className="text-purple-400" />
-                                        Inviter un membre
-                                    </h2>
+                                    <h2 className="text-lg font-bold text-[var(--text-color)] mb-4 flex items-center gap-2">
+                                    <UserPlus size={20} className="text-purple-400" />
+                                    Inviter un membre
+                                </h2>
                                     <form onSubmit={handleAddMember} className="flex flex-col gap-4">
                                         <input
                                             type="email"
@@ -366,7 +366,7 @@ export default function Organization() {
                                             })()}
                                         </div>
                                         <div className="flex-1 min-w-0">
-                                            <h3 className="font-bold text-white truncate">{member.profiles?.nom}</h3>
+                                            <h3 className="font-bold text-[var(--text-color)] truncate">{member.profiles?.nom}</h3>
                                             
                                             {editingMemberId === member.id ? (
                                                 <div className="mt-2 space-y-2">

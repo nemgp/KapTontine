@@ -142,10 +142,15 @@ export default function ReunionDashboard() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
                 <div className="glass-card bg-gradient-to-br from-white/5 to-transparent border-l-4 border-l-[var(--valorant-cyan)]">
                     <h2 className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-1">Prochaine Réunion</h2>
-                    <p className="text-3xl font-black text-white uppercase italic">{nextMeetingStr}</p>
+                    <p className="text-3xl font-black text-[var(--text-color)] uppercase italic">{nextMeetingStr}</p>
                     <div className="mt-4 flex items-center justify-between">
                         <span className="text-xs text-accent-cyan flex items-center gap-1 font-bold"><Clock size={14} /> 14:00</span>
-                        <a href="#" className="text-[10px] text-slate-400 hover:text-white flex items-center gap-1 uppercase font-bold tracking-widest transition-colors">
+                        <a 
+                            href={`https://meet.google.com/lookup/${(reunion?.nom || 'reunion').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-[10px] text-slate-400 hover:text-[var(--valorant-cyan)] flex items-center gap-1 uppercase font-bold tracking-widest transition-colors"
+                        >
                             <Video size={14} /> Lien Meet
                         </a>
                     </div>
@@ -154,7 +159,7 @@ export default function ReunionDashboard() {
                 <div className="glass-card border-l-4 border-l-[var(--valorant-red)]">
                     <h2 className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-1">Cagnotte Réunion</h2>
                     <div className="flex items-baseline gap-2">
-                        <span className="text-3xl font-black text-white italic">{totalTontine} €</span>
+                        <span className="text-3xl font-black text-[var(--text-color)] italic">{totalTontine} €</span>
                         <span className="text-[10px] text-slate-500 font-bold">Collectés</span>
                     </div>
                     <div className="mt-4">
@@ -166,7 +171,7 @@ export default function ReunionDashboard() {
 
                 <div className="glass-card border-l-4 border-l-purple-500">
                     <h2 className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-1">Membres Actifs</h2>
-                    <p className="text-3xl font-black text-white italic">{members.length}</p>
+                    <p className="text-3xl font-black text-[var(--text-color)] italic">{members.length}</p>
                     <div className="mt-4 flex items-center gap-2">
                          <div className="flex -space-x-2">
                             {members.slice(0, 5).map((m, i) => {
@@ -237,7 +242,7 @@ export default function ReunionDashboard() {
                                 </div>
                                 <div>
                                     <p className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Bénéficiaire</p>
-                                    <p className="text-lg font-black text-white uppercase italic group-hover:text-accent-red transition-colors">{item.name}</p>
+                                    <p className="text-lg font-black text-[var(--text-color)] uppercase italic group-hover:text-accent-red transition-colors">{item.name}</p>
                                 </div>
                             </div>
 

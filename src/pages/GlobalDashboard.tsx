@@ -141,7 +141,7 @@ export default function GlobalDashboard() {
             <div className="container mx-auto max-w-5xl">
                 <header className="flex justify-between items-center mb-10">
                     <div>
-                        <h1 className="text-3xl font-bold text-white drop-shadow-md">Mes Réunions</h1>
+                        <h1 className="text-3xl font-bold text-[var(--text-color)] drop-shadow-md">Mes Réunions</h1>
                         <button 
                             onClick={() => navigate('/profil')}
                             className="text-slate-400 mt-1 hover:text-purple-400 transition-colors flex items-center gap-2 text-sm"
@@ -177,8 +177,8 @@ export default function GlobalDashboard() {
                         <div className="bg-white/5 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 border border-white/10">
                             <Plus className="text-slate-400" size={32} />
                         </div>
-                        <h2 className="text-xl font-bold text-white mb-2">Aucune réunion</h2>
-                        <p className="text-slate-400 mb-8 max-w-md mx-auto">
+                        <h2 className="text-xl font-bold text-[var(--text-color)] mb-2">Aucune réunion</h2>
+                        <p className="text-[var(--text-muted)] mb-8 max-w-md mx-auto">
                             Vous ne participez à aucune réunion pour le moment. Vous pouvez créer votre propre groupe ou demander à être invité.
                         </p>
                         <button 
@@ -198,7 +198,7 @@ export default function GlobalDashboard() {
                             >
                                 <div className="flex justify-between items-start mb-4">
                                     <div>
-                                        <h3 className="text-xl font-bold text-white group-hover:text-purple-300 transition-colors">{reunion.nom}</h3>
+                                        <h3 className="text-xl font-bold text-[var(--text-color)] group-hover:text-purple-600 transition-colors">{reunion.nom}</h3>
                                         <div className="flex gap-2 mt-1.5">
                                             {reunion.is_premium ? (
                                                 <span className="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30">
@@ -211,11 +211,11 @@ export default function GlobalDashboard() {
                                             )}
                                         </div>
                                     </div>
-                                    <span className="text-[10px] uppercase tracking-wider px-2 py-1 rounded bg-black/20 text-slate-300">
+                                    <span className="text-[10px] uppercase tracking-wider px-2 py-1 rounded bg-white/10 text-[var(--text-muted)]">
                                         {reunion.userRole}
                                     </span>
                                 </div>
-                                <p className="text-sm text-slate-400 mb-6">{reunion.description}</p>
+                                <p className="text-sm text-[var(--text-muted)] mb-6">{reunion.description}</p>
                                 <div className="flex justify-between items-center text-sm border-t border-white/10 pt-4">
                                     <span className="text-slate-500">
                                         Créée le {new Date(reunion.date_creation).toLocaleDateString('fr-FR')}

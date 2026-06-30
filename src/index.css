@@ -129,6 +129,47 @@
   .hover\:text-red-300:hover {
     color: #DC2626 !important; /* red-600 */
   }
+
+  /* Modal overlay backgrounds - keep dark */
+  .bg-black\/80, .bg-black\/90 {
+    background-color: rgba(0, 0, 0, 0.75) !important;
+  }
+
+  /* Additional dark background inputs (readonly, login) */
+  .bg-black\/40 {
+    background-color: rgba(255, 255, 255, 0.8) !important;
+  }
+  .bg-black\/30 {
+    background-color: rgba(0, 0, 0, 0.04) !important;
+  }
+  .bg-slate-900 {
+    background-color: #FFFFFF !important;
+    color: #0F172A !important;
+  }
+  .bg-slate-800 {
+    background-color: #F1F5F9 !important;
+    color: #0F172A !important;
+  }
+
+  /* Header topbar light mode */
+  header.glass-panel {
+    background-color: rgba(255, 255, 255, 0.97) !important;
+    border-bottom: 1px solid rgba(15, 23, 42, 0.08) !important;
+    box-shadow: 0 1px 12px rgba(0,0,0,0.06) !important;
+  }
+
+  /* Loader in light mode stays neutral */
+  .text-slate-500 {
+    color: #64748B !important;
+  }
+
+  /* NavLink active state stays white text */
+  .bg-purple-600\/80, [class*="bg-purple-600"] {
+    color: #FFFFFF !important;
+  }
+  .bg-purple-600\/80 *, [class*="bg-purple-600"] * {
+    color: #FFFFFF !important;
+  }
 }
 
 @layer components {

@@ -16,7 +16,7 @@ export default function Documents() {
 
     return (
         <div className="pb-10">
-            <h1 className="text-4xl font-black text-white uppercase italic tracking-tighter mb-8">Documents & Archives</h1>
+            <h1 className="text-4xl font-black text-[var(--text-color)] uppercase italic tracking-tighter mb-8">Documents & Archives</h1>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
                 {/* Dossier Cycle en cours */}
@@ -29,7 +29,7 @@ export default function Documents() {
                     <div className="w-16 h-16 rounded-2xl bg-purple-500/20 flex items-center justify-center mb-4 shadow-[0_0_20px_rgba(168,85,247,0.2)] group-hover:shadow-[0_0_30px_rgba(168,85,247,0.4)] transition-all">
                         <FileText size={32} className="text-purple-300" />
                     </div>
-                    <h2 className="text-xl font-bold text-white mb-2 uppercase italic tracking-wider">Cycle en cours</h2>
+                    <h2 className="text-xl font-bold text-[var(--text-color)] mb-2 uppercase italic tracking-wider">Cycle en cours</h2>
                     <p className="text-xs text-slate-400 mb-6">Règlement intérieur, PV, Statuts</p>
                     <span className="text-[10px] font-black uppercase tracking-[0.2em] text-purple-400 flex items-center gap-2 group-hover:text-white transition-colors">
                         Accéder au Drive <ArrowRight size={12} />
@@ -46,7 +46,7 @@ export default function Documents() {
                     <div className="w-16 h-16 rounded-2xl bg-cyan-500/20 flex items-center justify-center mb-4 shadow-[0_0_20px_rgba(0,245,255,0.2)] group-hover:shadow-[0_0_30px_rgba(0,245,255,0.4)] transition-all">
                         <FileText size={32} className="text-cyan-300" />
                     </div>
-                    <h2 className="text-xl font-bold text-white mb-2 uppercase italic tracking-wider">Suivi Financier</h2>
+                    <h2 className="text-xl font-bold text-[var(--text-color)] mb-2 uppercase italic tracking-wider">Suivi Financier</h2>
                     <p className="text-xs text-slate-400 mb-6">Suivi historique des cotisations</p>
                     <div className="flex flex-col items-center gap-2">
                         <span className="text-[10px] font-black uppercase tracking-[0.2em] text-cyan-400 flex items-center gap-2 group-hover:text-white transition-colors">
@@ -68,7 +68,7 @@ export default function Documents() {
                     <div className="w-16 h-16 rounded-2xl bg-red-500/20 flex items-center justify-center mb-4 shadow-[0_0_20px_rgba(255,70,85,0.2)] group-hover:shadow-[0_0_30px_rgba(255,70,85,0.4)] transition-all">
                         <FileText size={32} className="text-red-300" />
                     </div>
-                    <h2 className="text-xl font-bold text-white mb-2 uppercase italic tracking-wider">Livret Épargne</h2>
+                    <h2 className="text-xl font-bold text-[var(--text-color)] mb-2 uppercase italic tracking-wider">Livret Épargne</h2>
                     <p className="text-xs text-slate-400 mb-6">Documents suivi épargne populaire</p>
                     <span className="text-[10px] font-black uppercase tracking-[0.2em] text-red-400 flex items-center gap-2 group-hover:text-white transition-colors">
                         Accéder au Drive <ArrowRight size={12} />
@@ -82,7 +82,7 @@ export default function Documents() {
                         <BookOpen size={28} className="text-white" />
                     </div>
                     <div>
-                        <h2 className="text-2xl font-black text-white uppercase italic tracking-tighter">Guide d'Utilisation</h2>
+                        <h2 className="text-2xl font-black text-[var(--text-color)] uppercase italic tracking-tighter">Guide d'Utilisation</h2>
                         <p className="text-slate-400 text-sm">Maîtrisez les outils de la plateforme KapTontine</p>
                     </div>
                 </div>
@@ -102,7 +102,7 @@ export default function Documents() {
                             >
                                 <div className="flex items-center gap-4">
                                     <section.icon className={section.color} size={24} />
-                                    <span className="font-bold text-white uppercase tracking-widest text-xs">{section.label}</span>
+                                    <span className="font-bold text-[var(--text-color)] uppercase tracking-widest text-xs">{section.label}</span>
                                 </div>
                                 {isExpanded(section.id) ? <ChevronDown className="text-slate-500" size={20} /> : <ChevronRight className="text-slate-500" size={20} />}
                             </button>

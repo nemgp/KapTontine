@@ -250,7 +250,7 @@ export default function Social() {
     return (
         <div className="pb-10">
             <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
-                <h1 className="text-3xl font-bold text-white drop-shadow-md">Vie Sociale</h1>
+                <h1 className="text-3xl font-bold text-[var(--text-color)] drop-shadow-md">Vie Sociale</h1>
                 
                 {/* Tabs */}
                 <div className="flex bg-white/5 p-1 rounded-xl border border-white/10">
@@ -264,7 +264,7 @@ export default function Social() {
                         onClick={() => setActiveTab('secours')}
                         className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === 'secours' ? 'bg-purple-600 text-white shadow-lg' : 'text-slate-400 hover:text-white'}`}
                     >
-                        Secours
+                        Soutiens
                     </button>
                 </div>
             </div>
@@ -322,7 +322,7 @@ export default function Social() {
                                             })()}
                                         </div>
                                         <div className="flex-1">
-                                            <p className="text-sm font-bold text-white">{action.profiles?.nom}</p>
+                                            <p className="text-sm font-bold text-[var(--text-color)]">{action.profiles?.nom}</p>
                                             <p className="text-[10px] text-slate-500">{new Date(action.date_creation).toLocaleString('fr-FR')}</p>
                                         </div>
                                         <span className="px-2 py-1 rounded-md bg-purple-500/10 border border-purple-500/20 text-[10px] text-purple-300 font-bold uppercase tracking-wider">
@@ -332,8 +332,8 @@ export default function Social() {
 
                                     {/* Action Content */}
                                     <div className="p-5">
-                                        <h3 className="text-xl font-bold text-white mb-2">{action.titre}</h3>
-                                        <p className="text-slate-300 whitespace-pre-wrap text-sm leading-relaxed">{action.texte}</p>
+                                        <h3 className="text-xl font-bold text-[var(--text-color)] mb-2">{action.titre}</h3>
+                                        <p className="text-[var(--text-muted)] whitespace-pre-wrap text-sm leading-relaxed">{action.texte}</p>
                                     </div>
 
                                     {/* Action Image */}
@@ -363,7 +363,7 @@ export default function Social() {
                                 <div className="flex items-center gap-3 mb-2">
                                     <span className="text-3xl">{type.icon}</span>
                                     <div className="flex-1">
-                                        <h3 className="font-semibold text-white text-sm">{type.label}</h3>
+                                        <h3 className="font-semibold text-[var(--text-color)] text-sm">{type.label}</h3>
                                         <p className="text-[10px] text-slate-400">{type.percent * 100}% de l'assiette</p>
                                     </div>
                                 </div>
@@ -376,7 +376,7 @@ export default function Social() {
                     
                     <div className="glass-card">
                         <div className="flex justify-between items-center mb-6">
-                            <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                            <h2 className="text-xl font-bold text-[var(--text-color)] flex items-center gap-2">
                                 <Heart className="text-red-400" size={24} />
                                 Historique des Soutiens Reçus
                             </h2>
@@ -413,7 +413,7 @@ export default function Social() {
                                             <div className="flex items-center gap-3">
                                                 <span className="text-2xl w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center border border-white/10 shrink-0">{typeInfo.icon}</span>
                                                 <div>
-                                                    <p className="text-sm font-bold text-white">{sup.member_name}</p>
+                                                    <p className="text-sm font-bold text-[var(--text-color)]">{sup.member_name}</p>
                                                     <p className="text-xs text-slate-500">{typeInfo.label} • {new Date(sup.date).toLocaleDateString()}</p>
                                                     {sup.notes && <p className="text-xs text-slate-400 mt-1 italic">{sup.notes}</p>}
                                                 </div>
