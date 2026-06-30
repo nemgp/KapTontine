@@ -128,17 +128,18 @@ export default function Organization() {
         }
 
         setIsAddingMember(true);
+        const cleanEmail = newMemberEmail.trim().toLowerCase();
 
         try {
             // Find profile by email
             const { data: profileData, error: profileError } = await supabase
                 .from('profiles')
                 .select('id')
-                .eq('email', newMemberEmail)
+                .eq('email', cleanEmail)
                 .single();
 
             if (profileError || !profileData) {
-                setInviteEmail(newMemberEmail);
+                setInviteEmail(cleanEmail);
                 setShowInviteModal(true);
                 setIsAddingMember(false);
                 return;
@@ -174,8 +175,9 @@ export default function Organization() {
             setNewMemberEmail('');
             setNewMemberPoste('Membre');
             fetchMembers();
-        } catch (err) {
+        } catch (err: any) {
             console.error("Error adding member:", err);
+            alert("Erreur lors de l'ajout du membre : " + (err.message || JSON.stringify(err)));
         } finally {
             setIsAddingMember(false);
         }

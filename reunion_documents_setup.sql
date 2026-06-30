@@ -26,6 +26,19 @@ create policy "Admins peuvent modifier la réunion"
     )
   );
 
+-- Politique d'insertion pour autoriser les admins de la réunion à ajouter des membres
+drop policy if exists "Admin peut ajouter des membres" on public.membres_reunion;
+create policy "Admin peut ajouter des membres"
+  on public.membres_reunion for insert
+  with check (
+    exists (
+      select 1 from public.membres_reunion mr
+      where mr.id_reunion = membres_reunion.id_reunion
+      and mr.id_profile = auth.uid()
+      and mr.role = 'admin'
+    )
+  );
+
 -- 2. CRÉATION DE LA TABLE POUR LES LIENS DE DOCUMENTS
 -- ============================================================
 create table if not exists public.reunion_documents (
