@@ -26,7 +26,7 @@ interface Saving {
 
 export default function Finance() {
     const { user } = useAuth();
-    const { reunion } = useReunion();
+    const { reunion, userRole } = useReunion();
     const { theme } = useTheme();
     const [activeTab, setActiveTab] = useState<'cotisations' | 'prets' | 'sanctions'>('cotisations');
 
@@ -46,7 +46,7 @@ export default function Finance() {
     const [absences, setAbsences] = useState(0);
     const [projectDelays, setProjectDelays] = useState(0);
 
-    // const isAdmin = userRole === 'admin' || true; // For now
+    const isAdmin = userRole === 'admin';
 
     useEffect(() => {
         if (reunion?.id) {
@@ -165,7 +165,7 @@ export default function Finance() {
                         <div className="glass-card">
                             <div className="flex justify-between items-center mb-6">
                                 <h2 className="text-xl font-bold text-[var(--text-color)] uppercase italic">Journal des Épargnes</h2>
-                                <button onClick={() => { setEditingSaving(null); setShowSavingModal(true); }} className="btn btn-primary py-2 px-2 shadow-lg flex items-center justify-center cursor-pointer" title="Ajouter une épargne"><Plus size={16} /></button>
+                                {isAdmin && <button onClick={() => { setEditingSaving(null); setShowSavingModal(true); }} className="btn btn-primary py-2 px-2 shadow-lg flex items-center justify-center cursor-pointer" title="Ajouter une épargne"><Plus size={16} /></button>}
                             </div>
                             <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
                                 {savings.map(s => (
@@ -178,10 +178,12 @@ export default function Finance() {
                                             <span className={`font-black ${s.type === 'depot' ? 'text-green-400' : 'text-red-400'}`}>
                                                 {s.type === 'depot' ? '+' : '-'}{s.amount} €
                                             </span>
-                                            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <button onClick={() => { setEditingSaving(s); setShowSavingModal(true); }} className="text-blue-400 p-1"><Edit2 size={14} /></button>
-                                                <button onClick={() => deleteSaving(s.id)} className="text-red-400 p-1"><Trash2 size={14} /></button>
-                                            </div>
+                                            {isAdmin && (
+                                                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <button onClick={() => { setEditingSaving(s); setShowSavingModal(true); }} className="text-blue-400 p-1"><Edit2 size={14} /></button>
+                                                    <button onClick={() => deleteSaving(s.id)} className="text-red-400 p-1"><Trash2 size={14} /></button>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 ))}
@@ -216,7 +218,7 @@ export default function Finance() {
                     <div className="glass-card">
                         <div className="flex justify-between items-center mb-6">
                             <h2 className="text-xl font-bold text-[var(--text-color)] uppercase italic">Prêts en Cours</h2>
-                            <button onClick={() => { setEditingLoan(null); setShowLoanModal(true); }} className="btn btn-primary py-2 px-2 shadow-lg flex items-center justify-center cursor-pointer" title="Créer un prêt"><Plus size={16} /></button>
+                            {isAdmin && <button onClick={() => { setEditingLoan(null); setShowLoanModal(true); }} className="btn btn-primary py-2 px-2 shadow-lg flex items-center justify-center cursor-pointer" title="Créer un prêt"><Plus size={16} /></button>}
                         </div>
                         <div className="space-y-4">
                             {loans.map(l => (
@@ -230,10 +232,12 @@ export default function Finance() {
                                     </div>
                                     <div className="flex items-center gap-4">
                                         <span className="font-black text-xl text-white">{l.amount} €</span>
-                                        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <button onClick={() => { setEditingLoan(l); setShowLoanModal(true); }} className="text-blue-400 p-1"><Edit2 size={14} /></button>
-                                            <button onClick={() => deleteLoan(l.id)} className="text-red-400 p-1"><Trash2 size={14} /></button>
-                                        </div>
+                                        {isAdmin && (
+                                            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <button onClick={() => { setEditingLoan(l); setShowLoanModal(true); }} className="text-blue-400 p-1"><Edit2 size={14} /></button>
+                                                <button onClick={() => deleteLoan(l.id)} className="text-red-400 p-1"><Trash2 size={14} /></button>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             ))}

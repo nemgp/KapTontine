@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Users, Wallet, HeartHandshake, FileText, Menu, X, LogOut, ArrowLeft, Settings, Sun, Moon } from 'lucide-react';
+import { LayoutDashboard, Users, Wallet, HeartHandshake, FileText, Menu, X, LogOut, ArrowLeft, Sun, Moon } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useReunion } from '../context/ReunionContext';
 import { useState } from 'react';
@@ -14,7 +14,7 @@ interface MainLayoutProps {
 
 export default function MainLayout({ children }: MainLayoutProps) {
     const { profile, logout } = useAuth();
-    const { reunion, userRole, userPoste } = useReunion();
+    const { reunion, userPoste } = useReunion();
     const { theme, toggleTheme } = useTheme();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const navigate = useNavigate();
@@ -26,8 +26,6 @@ export default function MainLayout({ children }: MainLayoutProps) {
         { path: 'social', label: 'Actions', icon: HeartHandshake },
         { path: 'documents', label: 'Documents', icon: FileText },
     ];
-
-    const canEdit = userRole === 'admin';
 
     return (
         <div className="min-h-screen flex flex-col">
@@ -83,17 +81,6 @@ export default function MainLayout({ children }: MainLayoutProps) {
                     >
                         {theme === 'dark' ? <Sun size={15} className="text-yellow-400" /> : <Moon size={15} className="text-blue-400" />}
                     </button>
-
-                    {/* Admin section shortcut */}
-                    {canEdit && (
-                        <NavLink
-                            to="organisation"
-                            className="hidden lg:flex items-center gap-1 px-2.5 py-1.5 text-[11px] text-purple-700 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-white/5 rounded-lg transition-colors border border-purple-300 dark:border-purple-500/20 bg-purple-50 dark:bg-purple-500/10 font-bold"
-                        >
-                            <Settings size={13} />
-                            Gérer
-                        </NavLink>
-                    )}
 
                     {/* Profile avatar */}
                     <button 
@@ -157,18 +144,6 @@ export default function MainLayout({ children }: MainLayoutProps) {
                             {item.label}
                         </NavLink>
                     ))}
-                    
-                    {/* Admin management in mobile drawer if not shown elsewhere */}
-                    {canEdit && (
-                        <NavLink
-                            to="organisation"
-                            onClick={() => setIsMobileMenuOpen(false)}
-                            className="flex items-center gap-3 px-4 py-3 rounded-xl text-purple-300 hover:bg-white/5 border border-purple-500/20 bg-purple-500/10 transition-colors"
-                        >
-                            <Settings size={18} />
-                            Gérer la réunion
-                        </NavLink>
-                    )}
                 </nav>
 
                 <div className="p-4 border-t border-white/10 bg-slate-900/30">

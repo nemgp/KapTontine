@@ -201,7 +201,6 @@ export default function ReunionDashboard() {
                     <TrendingUp className="text-accent-red" size={24} />
                     Ordre de Passage
                 </h2>
-                <div className="text-[10px] text-slate-500 font-bold uppercase tracking-[0.2em]">Cycle 6 (2026-2028)</div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

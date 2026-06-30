@@ -32,7 +32,6 @@ export default function Organization() {
 
     const [editingMemberId, setEditingMemberId] = useState<string | null>(null);
     const [editPoste, setEditPoste] = useState('');
-    const [editRole, setEditRole] = useState('');
     
     const [showUpgradeModal, setShowUpgradeModal] = useState(false);
     const [isUpgrading, setIsUpgrading] = useState(false);
@@ -160,12 +159,13 @@ export default function Organization() {
             }
 
             // Add to reunion
+            const role = ['Président', 'Trésorier', 'Secrétaire'].includes(newMemberPoste) ? 'admin' : 'membre';
             const { error: insertError } = await supabase
                 .from('membres_reunion')
                 .insert({
                     id_reunion: reunion.id,
                     id_profile: profileData.id,
-                    role: 'membre',
+                    role: role,
                     poste: newMemberPoste
                 });
 
@@ -183,11 +183,12 @@ export default function Organization() {
 
     const handleUpdateMember = async (memberId: string) => {
         try {
+            const role = ['Président', 'Trésorier', 'Secrétaire'].includes(editPoste) ? 'admin' : 'membre';
             const { error } = await supabase
                 .from('membres_reunion')
                 .update({
                     poste: editPoste,
-                    role: editRole
+                    role: role
                 })
                 .eq('id', memberId);
 
@@ -316,14 +317,19 @@ export default function Organization() {
                                             className="p-3 bg-slate-900/50 border border-white/10 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none text-white"
                                             required
                                         />
-                                        <input
-                                            type="text"
+                                        <select
                                             value={newMemberPoste}
                                             onChange={(e) => setNewMemberPoste(e.target.value)}
-                                            placeholder="Poste (ex: Trésorier)"
                                             className="p-3 bg-slate-900/50 border border-white/10 rounded-xl focus:ring-2 focus:ring-purple-500 outline-none text-white"
                                             required
-                                        />
+                                        >
+                                            <option value="Membre">Membre</option>
+                                            <option value="Président">Président</option>
+                                            <option value="Trésorier">Trésorier</option>
+                                            <option value="Secrétaire">Secrétaire</option>
+                                            <option value="Censeur">Censeur</option>
+                                            <option value="Commissaire aux comptes">Commissaire aux comptes</option>
+                                        </select>
                                         <button 
                                             type="submit" 
                                             className="btn btn-primary w-full"
@@ -370,18 +376,17 @@ export default function Organization() {
                                             
                                             {editingMemberId === member.id ? (
                                                 <div className="mt-2 space-y-2">
-                                                    <input 
+                                                    <select 
                                                         value={editPoste} 
                                                         onChange={(e) => setEditPoste(e.target.value)}
                                                         className="w-full p-1 bg-slate-800 border border-purple-500/50 rounded text-xs text-white"
-                                                    />
-                                                    <select 
-                                                        value={editRole} 
-                                                        onChange={(e) => setEditRole(e.target.value)}
-                                                        className="w-full p-1 bg-slate-800 border border-purple-500/50 rounded text-xs text-white"
                                                     >
-                                                        <option value="membre">Membre</option>
-                                                        <option value="admin">Admin</option>
+                                                        <option value="Membre">Membre</option>
+                                                        <option value="Président">Président</option>
+                                                        <option value="Trésorier">Trésorier</option>
+                                                        <option value="Secrétaire">Secrétaire</option>
+                                                        <option value="Censeur">Censeur</option>
+                                                        <option value="Commissaire aux comptes">Commissaire aux comptes</option>
                                                     </select>
                                                     <div className="flex gap-2">
                                                         <button onClick={() => handleUpdateMember(member.id)} className="p-1 text-green-400"><Check size={14} /></button>
@@ -402,7 +407,6 @@ export default function Organization() {
                                                     onClick={() => {
                                                         setEditingMemberId(member.id);
                                                         setEditPoste(member.poste);
-                                                        setEditRole(member.role);
                                                     }}
                                                     className="p-2 hover:bg-white/10 rounded-lg text-blue-400"
                                                 >
