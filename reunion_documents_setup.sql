@@ -38,3 +38,37 @@ create policy "Admins peuvent modifier les documents de la reunion"
       and membres_reunion.role = 'admin'
     )
   );
+
+-- ============================================================
+-- STORAGE POLICIES FOR 'action-images' BUCKET
+-- ============================================================
+
+-- Drop old policies to avoid duplicates/conflicts if any exist
+drop policy if exists "Membres peuvent voir les fichiers de action-images" on storage.objects;
+drop policy if exists "Admins/Membres peuvent charger dans action-images" on storage.objects;
+drop policy if exists "Admins peuvent supprimer les fichiers de action-images" on storage.objects;
+
+-- 1. Selection policy (viewing/downloading files)
+create policy "Membres peuvent voir les fichiers de action-images"
+  on storage.objects for select
+  using (
+    bucket_id = 'action-images'
+    and auth.role() = 'authenticated'
+  );
+
+-- 2. Insertion/Upload policy (uploading/replacing files)
+create policy "Admins/Membres peuvent charger dans action-images"
+  on storage.objects for insert
+  with check (
+    bucket_id = 'action-images'
+    and auth.role() = 'authenticated'
+  );
+
+-- 3. Deletion policy (deleting files)
+create policy "Admins peuvent supprimer les fichiers de action-images"
+  on storage.objects for delete
+  using (
+    bucket_id = 'action-images'
+    and auth.role() = 'authenticated'
+  );
+
